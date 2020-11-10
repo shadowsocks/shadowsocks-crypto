@@ -1,2 +1,0 @@
-# ss-crypto
-Shadowsocks Crypto

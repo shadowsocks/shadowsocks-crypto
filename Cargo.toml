@@ -1,0 +1,37 @@
+[package]
+name = "shadowsocks-crypto"
+version = "0.1.0"
+authors = ["luozijun <luozijun.assistant@gmail.com>"]
+edition = "2018"
+license = "MIT"
+keywords      = [ "Cryptography" ]
+description   = "Shadowsocks Crypto"
+repository    = "https://github.com/shadowsocks/shadowsocks-crypto"
+documentation = "https://docs.rs/shadowsocks-crypto"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+
+[dependencies]
+rand    = "0.7"
+crypto2 = "0.1"
+
+
+[target.'cfg(any(target_arch = "x86", target_arch = "x86_64"))'.dependencies]
+ring   = { version  = "0.16", optional = true  }
+
+[target.'cfg(any(target_arch = "arm", target_arch = "aarch64"))'.dependencies]
+ring   = { version  = "0.16", optional = true  }
+
+
+[dev-dependencies]
+hex = "0.4"
+
+
+[features]
+default = [
+    "std",
+]
+std = [
+    "crypto2/std",
+]
+nightly = [ ]
