@@ -2,7 +2,7 @@ ss-crypto
 ================
 
 
-支持的密码算法列表
+Supported Ciphers
 -----------------------
 
 Stream Cipher:
@@ -40,7 +40,7 @@ Stream Cipher:
 *   CAMELLIA_192_OFB
 *   CAMELLIA_256_OFB
 *   RC4
-*   CHACHA20 (IETF 版本)
+*   CHACHA20 (IETF Version)
 
 
 AEAD Cipher：
@@ -57,4 +57,4 @@ AEAD Cipher：
 *   AES_SIV_CMAC_512
 *   AES_128_GCM_SIV
 *   AES_256_GCM_SIV
-*   CHACHA20_POLY1305 (IETF 版本)
+*   CHACHA20_POLY1305 (IETF Version)
