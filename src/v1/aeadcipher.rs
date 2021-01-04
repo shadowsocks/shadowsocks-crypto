@@ -1,22 +1,29 @@
 pub use crypto2::aeadcipher::{
-    Aes128Ccm, Aes256Ccm,
-    Aes128GcmSiv, Aes256GcmSiv,
-    Aes128OcbTag128, Aes192OcbTag128, Aes256OcbTag128,
-    AesSivCmac256, AesSivCmac384, AesSivCmac512,
+    Aes128Ccm, Aes128GcmSiv, Aes128OcbTag128, Aes192OcbTag128, Aes256Ccm, Aes256GcmSiv,
+    Aes256OcbTag128, AesSivCmac256, AesSivCmac384, AesSivCmac512,
 };
 #[cfg(not(all(
-    any(target_arch = "x86", target_arch = "x86_64", target_arch = "arm", target_arch = "aarch64"),
+    any(
+        target_arch = "x86",
+        target_arch = "x86_64",
+        target_arch = "arm",
+        target_arch = "aarch64"
+    ),
     feature = "ring"
 )))]
 pub use crypto2::aeadcipher::{Aes128Gcm, Aes256Gcm, Chacha20Poly1305};
 
 #[cfg(all(
-    any(target_arch = "x86", target_arch = "x86_64", target_arch = "arm", target_arch = "aarch64"),
+    any(
+        target_arch = "x86",
+        target_arch = "x86_64",
+        target_arch = "arm",
+        target_arch = "aarch64"
+    ),
     feature = "ring"
 ))]
 pub use super::ring::{Aes128Gcm, Aes256Gcm, Chacha20Poly1305};
 use super::CipherKind;
-
 
 trait AeadCipherInner {
     fn ac_kind(&self) -> CipherKind;
@@ -56,11 +63,15 @@ macro_rules! impl_aead_cipher {
                 self.encrypt_slice(nonce, &[], plaintext_in_ciphertext_out);
             }
 
-            fn ac_decrypt_slice(&self, nonce: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
+            fn ac_decrypt_slice(
+                &self,
+                nonce: &[u8],
+                ciphertext_in_plaintext_out: &mut [u8],
+            ) -> bool {
                 self.decrypt_slice(nonce, &[], ciphertext_in_plaintext_out)
             }
         }
-    }
+    };
 }
 
 macro_rules! impl_siv_cmac_cipher {
@@ -84,26 +95,29 @@ macro_rules! impl_siv_cmac_cipher {
             fn ac_tag_len(&self) -> usize {
                 $name::TAG_LEN
             }
-            
+
             // NOTE: SIV-CMAC 模式，Nonce 在 AAD 数据的最后面。
             //       TAG 默认也在 PKT 的前面，为此我们这里需要手动把 TAG 数据放置在 密文的后面。
             fn ac_encrypt_slice(&self, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
-                let len  = plaintext_in_ciphertext_out.len();
+                let len = plaintext_in_ciphertext_out.len();
                 let plen = len - Self::TAG_LEN;
                 let (plaintext, tag_out) = plaintext_in_ciphertext_out.split_at_mut(plen);
                 self.encrypt_slice_detached(&[nonce], plaintext, tag_out);
             }
 
-            fn ac_decrypt_slice(&self, nonce: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
-                let len  = ciphertext_in_plaintext_out.len();
+            fn ac_decrypt_slice(
+                &self,
+                nonce: &[u8],
+                ciphertext_in_plaintext_out: &mut [u8],
+            ) -> bool {
+                let len = ciphertext_in_plaintext_out.len();
                 let clen = len - Self::TAG_LEN;
                 let (ciphertext, tag_in) = ciphertext_in_plaintext_out.split_at_mut(clen);
                 self.decrypt_slice_detached(&[nonce], ciphertext, &tag_in)
             }
         }
-    }
+    };
 }
-
 
 impl_aead_cipher!(Aes128Ccm, AES_128_CCM);
 impl_aead_cipher!(Aes256Ccm, AES_256_CCM);
@@ -123,7 +137,6 @@ impl_siv_cmac_cipher!(AesSivCmac256, AES_SIV_CMAC_256);
 impl_siv_cmac_cipher!(AesSivCmac384, AES_SIV_CMAC_384);
 impl_siv_cmac_cipher!(AesSivCmac512, AES_SIV_CMAC_512);
 
-
 pub struct AeadCipher {
     cipher: Box<dyn AeadCipherInner + Send + 'static>,
     nlen: usize,
@@ -133,24 +146,23 @@ pub struct AeadCipher {
 impl AeadCipher {
     const N_MAX: usize = 16;
 
-
     pub fn new(kind: CipherKind, key: &[u8]) -> Self {
         use self::CipherKind::*;
 
         let cipher: Box<dyn AeadCipherInner + Send + 'static> = match kind {
-            AES_128_CCM           => Box::new(Aes128Ccm::new(key)),
-            AES_256_CCM           => Box::new(Aes256Ccm::new(key)),
+            AES_128_CCM => Box::new(Aes128Ccm::new(key)),
+            AES_256_CCM => Box::new(Aes256Ccm::new(key)),
             AES_128_OCB_TAGLEN128 => Box::new(Aes128OcbTag128::new(key)),
             AES_192_OCB_TAGLEN128 => Box::new(Aes192OcbTag128::new(key)),
             AES_256_OCB_TAGLEN128 => Box::new(Aes256OcbTag128::new(key)),
-            AES_128_GCM           => Box::new(Aes128Gcm::new(key)),
-            AES_256_GCM           => Box::new(Aes256Gcm::new(key)),
-            AES_SIV_CMAC_256      => Box::new(AesSivCmac256::new(key)),
-            AES_SIV_CMAC_384      => Box::new(AesSivCmac384::new(key)),
-            AES_SIV_CMAC_512      => Box::new(AesSivCmac512::new(key)),
-            AES_128_GCM_SIV       => Box::new(Aes128GcmSiv::new(key)),
-            AES_256_GCM_SIV       => Box::new(Aes256GcmSiv::new(key)),
-            CHACHA20_POLY1305     => Box::new(Chacha20Poly1305::new(key)),
+            AES_128_GCM => Box::new(Aes128Gcm::new(key)),
+            AES_256_GCM => Box::new(Aes256Gcm::new(key)),
+            AES_SIV_CMAC_256 => Box::new(AesSivCmac256::new(key)),
+            AES_SIV_CMAC_384 => Box::new(AesSivCmac384::new(key)),
+            AES_SIV_CMAC_512 => Box::new(AesSivCmac512::new(key)),
+            AES_128_GCM_SIV => Box::new(Aes128GcmSiv::new(key)),
+            AES_256_GCM_SIV => Box::new(Aes256GcmSiv::new(key)),
+            CHACHA20_POLY1305 => Box::new(Chacha20Poly1305::new(key)),
             _ => unreachable!(),
         };
 
@@ -158,7 +170,11 @@ impl AeadCipher {
 
         let nonce = [0u8; Self::N_MAX];
 
-        Self { cipher, nonce, nlen }
+        Self {
+            cipher,
+            nonce,
+            nlen,
+        }
     }
 
     pub fn kind(&self) -> CipherKind {
@@ -182,18 +198,20 @@ impl AeadCipher {
             n += 1;
         }
     }
-    
+
     pub fn encrypt(&mut self, plaintext_in_ciphertext_out: &mut [u8]) {
         let nonce = &self.nonce[..self.nlen];
-        self.cipher.ac_encrypt_slice(nonce, plaintext_in_ciphertext_out);
+        self.cipher
+            .ac_encrypt_slice(nonce, plaintext_in_ciphertext_out);
         self.increase_nonce();
     }
 
     pub fn decrypt(&mut self, ciphertext_in_plaintext_out: &mut [u8]) -> bool {
         let nonce = &self.nonce[..self.nlen];
-        let ret = self.cipher.ac_decrypt_slice(nonce, ciphertext_in_plaintext_out);
+        let ret = self
+            .cipher
+            .ac_decrypt_slice(nonce, ciphertext_in_plaintext_out);
         self.increase_nonce();
         ret
     }
 }
-
