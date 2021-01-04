@@ -12,7 +12,7 @@ documentation = "https://docs.rs/shadowsocks-crypto"
 
 
 [dependencies]
-rand    = "0.7"
+rand    = "0.8"
 crypto2 = "0.1"
 
 
