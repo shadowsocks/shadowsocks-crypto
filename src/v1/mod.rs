@@ -1,9 +1,9 @@
 //! Shadowsocks V1 protocol ciphers
 
-#[cfg(feature = "v1_aead")]
+#[cfg(feature = "v1-aead")]
 mod aeadcipher;
 mod dummy;
-#[cfg(feature = "v1_stream")]
+#[cfg(feature = "v1-stream")]
 mod streamcipher;
 
 mod cipher;
@@ -17,7 +17,7 @@ mod kind;
         target_arch = "aarch64"
     ),
     feature = "ring",
-    feature = "v1_aead",
+    feature = "v1-aead",
 ))]
 mod ring;
 

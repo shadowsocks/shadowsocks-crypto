@@ -31,12 +31,12 @@ hex = "0.4"
 default = [
     "std",
     "v1",
-    "v1_aead",
+    "v1-aead",
 ]
 std = [
     "crypto2/std",
 ]
 nightly = [ ]
 v1 = [ ]
-v1_stream = [ "v1" ]
-v1_aead = [ "v1" ]
+v1-stream = [ "v1" ]
+v1-aead = [ "v1" ]

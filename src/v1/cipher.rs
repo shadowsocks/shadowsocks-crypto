@@ -1,7 +1,7 @@
-#[cfg(feature = "v1_aead")]
+#[cfg(feature = "v1-aead")]
 use super::aeadcipher::AeadCipher;
 use super::dummy::DummyCipher;
-#[cfg(feature = "v1_stream")]
+#[cfg(feature = "v1-stream")]
 use super::streamcipher::StreamCipher;
 use super::CipherCategory;
 use super::CipherKind;
@@ -15,93 +15,93 @@ pub const fn available_ciphers() -> &'static [&'static str] {
     &[
         "plain",
         "none",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "table",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "rc4-md5",
         // 序列密码
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "aes-128-ctr",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "aes-192-ctr",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "aes-256-ctr",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "aes-128-cfb",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "aes-128-cfb1",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "aes-128-cfb8",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "aes-128-cfb128",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "aes-192-cfb",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "aes-192-cfb1",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "aes-192-cfb8",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "aes-192-cfb128",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "aes-256-cfb",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "aes-256-cfb1",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "aes-256-cfb8",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "aes-256-cfb128",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "aes-128-ofb",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "aes-192-ofb",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "aes-256-ofb",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "camellia-128-ctr",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "camellia-192-ctr",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "camellia-256-ctr",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "camellia-128-cfb",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "camellia-128-cfb1",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "camellia-128-cfb8",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "camellia-128-cfb128",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "camellia-192-cfb",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "camellia-192-cfb1",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "camellia-192-cfb8",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "camellia-192-cfb128",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "camellia-256-cfb",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "camellia-256-cfb1",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "camellia-256-cfb8",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "camellia-256-cfb128",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "camellia-128-ofb",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "camellia-192-ofb",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "camellia-256-ofb",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "rc4",
-        #[cfg(feature = "v1_stream")]
+        #[cfg(feature = "v1-stream")]
         "chacha20-ietf",
         // AEAD 密码算法
-        #[cfg(feature = "v1_aead")]
+        #[cfg(feature = "v1-aead")]
         "aes-128-gcm",
-        #[cfg(feature = "v1_aead")]
+        #[cfg(feature = "v1-aead")]
         "aes-256-gcm",
-        #[cfg(feature = "v1_aead")]
+        #[cfg(feature = "v1-aead")]
         "chacha20-ietf-poly1305",
         // NOTE: 也许将来会开启的密码算法。
         // "aes-128-ccm", "aes-256-ccm",
@@ -177,7 +177,7 @@ impl CipherInner for DummyCipher {
     }
 }
 
-#[cfg(feature = "v1_stream")]
+#[cfg(feature = "v1-stream")]
 impl CipherInner for StreamCipher {
     fn ss_kind(&self) -> CipherKind {
         self.kind()
@@ -197,7 +197,7 @@ impl CipherInner for StreamCipher {
     }
 }
 
-#[cfg(feature = "v1_aead")]
+#[cfg(feature = "v1-aead")]
 impl CipherInner for AeadCipher {
     fn ss_kind(&self) -> CipherKind {
         self.kind()
@@ -222,9 +222,9 @@ pub struct Cipher {
 }
 
 impl Cipher {
-    #[cfg(feature = "v1_aead")]
+    #[cfg(feature = "v1-aead")]
     const MAX_KEY_LEN: usize = 64;
-    #[cfg(feature = "v1_aead")]
+    #[cfg(feature = "v1-aead")]
     const SUBKEY_INFO: &'static [u8] = b"ss-subkey";
 
     /// Create a new Cipher of `kind`
@@ -243,13 +243,13 @@ impl Cipher {
 
                 Self { cipher }
             }
-            #[cfg(feature = "v1_stream")]
+            #[cfg(feature = "v1-stream")]
             CipherCategory::Stream => {
                 let cipher = Box::new(StreamCipher::new(kind, key, iv_or_salt));
 
                 Self { cipher }
             }
-            #[cfg(feature = "v1_aead")]
+            #[cfg(feature = "v1-aead")]
             CipherCategory::Aead => {
                 use crypto2::kdf::HkdfSha1;
 
@@ -310,7 +310,7 @@ fn test_cipher_new_none() {
     assert_eq!(cipher.tag_len(), 0);
 }
 
-#[cfg(feature = "v1_aead")]
+#[cfg(feature = "v1-aead")]
 #[test]
 fn test_cipher_new_aead() {
     let key = [2u8; 16];
@@ -321,7 +321,7 @@ fn test_cipher_new_aead() {
     assert_eq!(cipher.tag_len(), 16);
 }
 
-#[cfg(feature = "v1_stream")]
+#[cfg(feature = "v1-stream")]
 #[test]
 fn test_cipher_new_stream() {
     let key = [2u8; 32];
