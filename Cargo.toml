@@ -30,8 +30,13 @@ hex = "0.4"
 [features]
 default = [
     "std",
+    "v1",
+    "v1_aead",
 ]
 std = [
     "crypto2/std",
 ]
 nightly = [ ]
+v1 = [ ]
+v1_stream = [ "v1" ]
+v1_aead = [ "v1" ]

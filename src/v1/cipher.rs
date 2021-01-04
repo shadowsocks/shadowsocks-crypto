@@ -1,40 +1,117 @@
-use super::dummy::DummyCipher;
-use super::streamcipher::StreamCipher;
+#[cfg(feature = "v1_aead")]
 use super::aeadcipher::AeadCipher;
-use super::CipherKind;
+use super::dummy::DummyCipher;
+#[cfg(feature = "v1_stream")]
+use super::streamcipher::StreamCipher;
 use super::CipherCategory;
+use super::CipherKind;
 
 use crypto2::hash::Md5;
-use crypto2::kdf::HkdfSha1;
 
-
+/// Get available ciphers in string representation
+///
+/// Commonly used for checking users' configuration input
 pub const fn available_ciphers() -> &'static [&'static str] {
     &[
-        "plain", "none", "table", "rc4-md5",
-
+        "plain",
+        "none",
+        #[cfg(feature = "v1_stream")]
+        "table",
+        #[cfg(feature = "v1_stream")]
+        "rc4-md5",
         // 序列密码
-        "aes-128-ctr", "aes-192-ctr", "aes-256-ctr",
-        "aes-128-cfb", "aes-128-cfb1", "aes-128-cfb8", "aes-128-cfb128",
-        "aes-192-cfb", "aes-192-cfb1", "aes-192-cfb8", "aes-192-cfb128",
-        "aes-256-cfb", "aes-256-cfb1", "aes-256-cfb8", "aes-256-cfb128",
-        "aes-128-ofb", "aes-192-ofb", "aes-256-ofb",
-        "camellia-128-ctr", "camellia-192-ctr", "camellia-256-ctr",
-        "camellia-128-cfb", "camellia-128-cfb1", "camellia-128-cfb8", "camellia-128-cfb128",
-        "camellia-192-cfb", "camellia-192-cfb1", "camellia-192-cfb8", "camellia-192-cfb128",
-        "camellia-256-cfb", "camellia-256-cfb1", "camellia-256-cfb8", "camellia-256-cfb128",
-        "camellia-128-ofb", "camellia-192-ofb", "camellia-256-ofb",
-        "rc4", "chacha20-ietf",
-
+        #[cfg(feature = "v1_stream")]
+        "aes-128-ctr",
+        #[cfg(feature = "v1_stream")]
+        "aes-192-ctr",
+        #[cfg(feature = "v1_stream")]
+        "aes-256-ctr",
+        #[cfg(feature = "v1_stream")]
+        "aes-128-cfb",
+        #[cfg(feature = "v1_stream")]
+        "aes-128-cfb1",
+        #[cfg(feature = "v1_stream")]
+        "aes-128-cfb8",
+        #[cfg(feature = "v1_stream")]
+        "aes-128-cfb128",
+        #[cfg(feature = "v1_stream")]
+        "aes-192-cfb",
+        #[cfg(feature = "v1_stream")]
+        "aes-192-cfb1",
+        #[cfg(feature = "v1_stream")]
+        "aes-192-cfb8",
+        #[cfg(feature = "v1_stream")]
+        "aes-192-cfb128",
+        #[cfg(feature = "v1_stream")]
+        "aes-256-cfb",
+        #[cfg(feature = "v1_stream")]
+        "aes-256-cfb1",
+        #[cfg(feature = "v1_stream")]
+        "aes-256-cfb8",
+        #[cfg(feature = "v1_stream")]
+        "aes-256-cfb128",
+        #[cfg(feature = "v1_stream")]
+        "aes-128-ofb",
+        #[cfg(feature = "v1_stream")]
+        "aes-192-ofb",
+        #[cfg(feature = "v1_stream")]
+        "aes-256-ofb",
+        #[cfg(feature = "v1_stream")]
+        "camellia-128-ctr",
+        #[cfg(feature = "v1_stream")]
+        "camellia-192-ctr",
+        #[cfg(feature = "v1_stream")]
+        "camellia-256-ctr",
+        #[cfg(feature = "v1_stream")]
+        "camellia-128-cfb",
+        #[cfg(feature = "v1_stream")]
+        "camellia-128-cfb1",
+        #[cfg(feature = "v1_stream")]
+        "camellia-128-cfb8",
+        #[cfg(feature = "v1_stream")]
+        "camellia-128-cfb128",
+        #[cfg(feature = "v1_stream")]
+        "camellia-192-cfb",
+        #[cfg(feature = "v1_stream")]
+        "camellia-192-cfb1",
+        #[cfg(feature = "v1_stream")]
+        "camellia-192-cfb8",
+        #[cfg(feature = "v1_stream")]
+        "camellia-192-cfb128",
+        #[cfg(feature = "v1_stream")]
+        "camellia-256-cfb",
+        #[cfg(feature = "v1_stream")]
+        "camellia-256-cfb1",
+        #[cfg(feature = "v1_stream")]
+        "camellia-256-cfb8",
+        #[cfg(feature = "v1_stream")]
+        "camellia-256-cfb128",
+        #[cfg(feature = "v1_stream")]
+        "camellia-128-ofb",
+        #[cfg(feature = "v1_stream")]
+        "camellia-192-ofb",
+        #[cfg(feature = "v1_stream")]
+        "camellia-256-ofb",
+        #[cfg(feature = "v1_stream")]
+        "rc4",
+        #[cfg(feature = "v1_stream")]
+        "chacha20-ietf",
         // AEAD 密码算法
-        "aes-128-gcm", "aes-256-gcm", "chacha20-ietf-poly1305", 
+        #[cfg(feature = "v1_aead")]
+        "aes-128-gcm",
+        #[cfg(feature = "v1_aead")]
+        "aes-256-gcm",
+        #[cfg(feature = "v1_aead")]
+        "chacha20-ietf-poly1305",
         // NOTE: 也许将来会开启的密码算法。
-        // "aes-128-ccm", "aes-256-ccm", 
+        // "aes-128-ccm", "aes-256-ccm",
         // "aes-128-gcm-siv", "aes-256-gcm-siv",
-        // "aes-128-ocb-taglen128", "aes-192-ocb-taglen128", "aes-256-ocb-taglen128", 
-        // "aes-siv-cmac-256", "aes-siv-cmac-384", "aes-siv-cmac-512", 
+        // "aes-128-ocb-taglen128", "aes-192-ocb-taglen128", "aes-256-ocb-taglen128",
+        // "aes-siv-cmac-256", "aes-siv-cmac-384", "aes-siv-cmac-512",
     ]
 }
 
+/// Generate random bytes into `iv_or_salt`
 pub fn random_iv_or_salt(iv_or_salt: &mut [u8]) {
     // Gen IV or Gen Salt by KEY-LEN
     if iv_or_salt.is_empty() {
@@ -51,6 +128,7 @@ pub fn random_iv_or_salt(iv_or_salt: &mut [u8]) {
     }
 }
 
+/// Key derivation of OpenSSL's [EVP_BytesToKey](https://wiki.openssl.org/index.php/Manual:EVP_BytesToKey(3))
 pub fn openssl_bytes_to_key(password: &[u8], key: &mut [u8]) {
     let key_len = key.len();
 
@@ -62,11 +140,11 @@ pub fn openssl_bytes_to_key(password: &[u8], key: &mut [u8]) {
         if let Some(digest) = last_digest {
             m.update(&digest);
         }
-        
+
         m.update(password);
-        
+
         let digest = m.finalize();
-        
+
         let amt = std::cmp::min(key_len - offset, Md5::DIGEST_LEN);
         key[offset..offset + amt].copy_from_slice(&digest[..amt]);
 
@@ -83,7 +161,6 @@ trait CipherInner {
     fn ss_decrypt_slice(&mut self, ciphertext_in_plaintext_out: &mut [u8]) -> bool;
 }
 
-
 impl CipherInner for DummyCipher {
     fn ss_kind(&self) -> CipherKind {
         CipherKind::NONE
@@ -94,14 +171,13 @@ impl CipherInner for DummyCipher {
     fn ss_tag_len(&self) -> usize {
         0
     }
-    fn ss_encrypt_slice(&mut self, _plaintext_in_ciphertext_out: &mut [u8]) {
-        
-    }
+    fn ss_encrypt_slice(&mut self, _plaintext_in_ciphertext_out: &mut [u8]) {}
     fn ss_decrypt_slice(&mut self, _ciphertext_in_plaintext_out: &mut [u8]) -> bool {
         true
     }
 }
 
+#[cfg(feature = "v1_stream")]
 impl CipherInner for StreamCipher {
     fn ss_kind(&self) -> CipherKind {
         self.kind()
@@ -121,6 +197,7 @@ impl CipherInner for StreamCipher {
     }
 }
 
+#[cfg(feature = "v1_aead")]
 impl CipherInner for AeadCipher {
     fn ss_kind(&self) -> CipherKind {
         self.kind()
@@ -139,30 +216,43 @@ impl CipherInner for AeadCipher {
     }
 }
 
+/// Unified interface of Ciphers
 pub struct Cipher {
     cipher: Box<dyn CipherInner + Send + 'static>,
 }
 
 impl Cipher {
+    #[cfg(feature = "v1_aead")]
     const MAX_KEY_LEN: usize = 64;
+    #[cfg(feature = "v1_aead")]
     const SUBKEY_INFO: &'static [u8] = b"ss-subkey";
 
-
+    /// Create a new Cipher of `kind`
+    ///
+    /// - Stream Ciphers initialize with IV
+    /// - AEAD Ciphers initialize with SALT
     pub fn new(kind: CipherKind, key: &[u8], iv_or_salt: &[u8]) -> Self {
         let category = kind.category();
 
         match category {
             CipherCategory::None => {
+                let _ = key;
+                let _ = iv_or_salt;
+
                 let cipher = Box::new(DummyCipher::new());
 
                 Self { cipher }
-            },
+            }
+            #[cfg(feature = "v1_stream")]
             CipherCategory::Stream => {
                 let cipher = Box::new(StreamCipher::new(kind, key, iv_or_salt));
 
                 Self { cipher }
-            },
+            }
+            #[cfg(feature = "v1_aead")]
             CipherCategory::Aead => {
+                use crypto2::kdf::HkdfSha1;
+
                 // Gen SubKey
                 let ikm = key;
                 let mut okm = [0u8; Self::MAX_KEY_LEN];
@@ -173,26 +263,37 @@ impl Cipher {
                 let cipher = Box::new(AeadCipher::new(kind, subkey));
 
                 Self { cipher }
-            },
+            }
         }
     }
 
+    /// Get the `CipherCategory` of the current cipher
     pub fn category(&self) -> CipherCategory {
         self.cipher.ss_category()
     }
 
+    /// Get the `CipherKind` of the current cipher
     pub fn kind(&self) -> CipherKind {
         self.cipher.ss_kind()
     }
 
+    /// Get the TAG length of AEAD ciphers
     pub fn tag_len(&self) -> usize {
         self.cipher.ss_tag_len()
     }
 
+    /// Encrypt a packet. Encrypted result will be written in `pkt`
+    ///
+    /// - Stream Ciphers: the size of input and output packets are the same
+    /// - AEAD Ciphers: the size of output must be at least `input.len() + TAG_LEN`
     pub fn encrypt_packet(&mut self, pkt: &mut [u8]) {
         self.cipher.ss_encrypt_slice(pkt)
     }
 
+    /// Decrypt a packet. Decrypted result will be written in `pkt`
+    ///
+    /// - Stream Ciphers: the size of input and output packets are the same
+    /// - AEAD Ciphers: the size of output is `input.len() - TAG_LEN`
     #[must_use]
     pub fn decrypt_packet(&mut self, pkt: &mut [u8]) -> bool {
         self.cipher.ss_decrypt_slice(pkt)
@@ -200,19 +301,33 @@ impl Cipher {
 }
 
 #[test]
-fn test_cipher_new() {
-    let key  = [2u8; 16];
+fn test_cipher_new_none() {
+    let key = [2u8; 16];
+    let salt = [1u8; 16];
+    let kind = CipherKind::NONE;
+
+    let cipher = Cipher::new(kind, &key, &salt);
+    assert_eq!(cipher.tag_len(), 0);
+}
+
+#[cfg(feature = "v1_aead")]
+#[test]
+fn test_cipher_new_aead() {
+    let key = [2u8; 16];
     let salt = [1u8; 16];
     let kind = CipherKind::AES_128_GCM;
-    
-    let mut cipher = Cipher::new(kind, &key, &salt);
-    assert_eq!(cipher.tag_len(), 16);
 
-    
-    let key  = [2u8; 32];
-    let iv   = [1u8; 12];
+    let cipher = Cipher::new(kind, &key, &salt);
+    assert_eq!(cipher.tag_len(), 16);
+}
+
+#[cfg(feature = "v1_stream")]
+#[test]
+fn test_cipher_new_stream() {
+    let key = [2u8; 32];
+    let iv = [1u8; 12];
     let kind = CipherKind::CHACHA20;
-    
-    let mut cipher = Cipher::new(kind, &key, &iv);
+
+    let cipher = Cipher::new(kind, &key, &iv);
     assert_eq!(cipher.tag_len(), 0);
 }
