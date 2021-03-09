@@ -218,7 +218,7 @@ impl CipherInner for AeadCipher {
 
 /// Unified interface of Ciphers
 pub struct Cipher {
-    cipher: Box<dyn CipherInner + Send + 'static>,
+    cipher: Box<dyn CipherInner + Send + Sync + 'static>,
 }
 
 impl Cipher {

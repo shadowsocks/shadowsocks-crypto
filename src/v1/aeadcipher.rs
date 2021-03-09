@@ -138,7 +138,7 @@ impl_siv_cmac_cipher!(AesSivCmac384, AES_SIV_CMAC_384);
 impl_siv_cmac_cipher!(AesSivCmac512, AES_SIV_CMAC_512);
 
 pub struct AeadCipher {
-    cipher: Box<dyn AeadCipherInner + Send + 'static>,
+    cipher: Box<dyn AeadCipherInner + Send + Sync + 'static>,
     nlen: usize,
     nonce: [u8; Self::N_MAX],
 }
@@ -149,7 +149,7 @@ impl AeadCipher {
     pub fn new(kind: CipherKind, key: &[u8]) -> Self {
         use self::CipherKind::*;
 
-        let cipher: Box<dyn AeadCipherInner + Send + 'static> = match kind {
+        let cipher: Box<dyn AeadCipherInner + Send + Sync + 'static> = match kind {
             AES_128_CCM => Box::new(Aes128Ccm::new(key)),
             AES_256_CCM => Box::new(Aes256Ccm::new(key)),
             AES_128_OCB_TAGLEN128 => Box::new(Aes128OcbTag128::new(key)),

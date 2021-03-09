@@ -96,14 +96,14 @@ impl_cipher!(Rc4, RC4);
 impl_cipher!(Chacha20, CHACHA20);
 
 pub struct StreamCipher {
-    cipher: Box<dyn StreamCipherInner + Send + 'static>,
+    cipher: Box<dyn StreamCipherInner + Send + Sync + 'static>,
 }
 
 impl StreamCipher {
     pub fn new(kind: CipherKind, key: &[u8], iv: &[u8]) -> Self {
         use self::CipherKind::*;
 
-        let cipher: Box<dyn StreamCipherInner + Send + 'static> = match kind {
+        let cipher: Box<dyn StreamCipherInner + Send + Sync + 'static> = match kind {
             SS_TABLE => Box::new(Table::new(key, iv)),
             SS_RC4_MD5 => Box::new(Rc4Md5::new(key, iv)),
             AES_128_CTR => Box::new(Aes128Ctr::new(key, iv)),
