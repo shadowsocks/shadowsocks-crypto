@@ -1,6 +1,7 @@
-ss-crypto
-================
+shadowsocks-crypto
+==================
 
+shadowsocks' flavored cryptographic algorithm in pure Rust.
 
 Supported Ciphers
 -----------------------

@@ -217,8 +217,34 @@ impl CipherInner for AeadCipher {
 }
 
 /// Unified interface of Ciphers
-pub struct Cipher {
-    cipher: Box<dyn CipherInner + Send + 'static>,
+pub enum Cipher {
+    Dummy(DummyCipher),
+    #[cfg(feature = "v1-stream")]
+    Stream(StreamCipher),
+    #[cfg(feature = "v1-aead")]
+    Aead(AeadCipher),
+}
+
+macro_rules! cipher_method_forward {
+    (ref $self:expr, $method:ident $(, $param:expr),*) => {
+        match *$self {
+            Cipher::Dummy(ref c) => c.$method($($param),*),
+            #[cfg(feature = "v1-stream")]
+            Cipher::Stream(ref c) => c.$method($($param),*),
+            #[cfg(feature = "v1-aead")]
+            Cipher::Aead(ref c) => c.$method($($param),*),
+        }
+    };
+
+    (mut $self:expr, $method:ident $(, $param:expr),*) => {
+        match *$self {
+            Cipher::Dummy(ref mut c) => c.$method($($param),*),
+            #[cfg(feature = "v1-stream")]
+            Cipher::Stream(ref mut c) => c.$method($($param),*),
+            #[cfg(feature = "v1-aead")]
+            Cipher::Aead(ref mut c) => c.$method($($param),*),
+        }
+    };
 }
 
 impl Cipher {
@@ -231,7 +257,7 @@ impl Cipher {
     ///
     /// - Stream Ciphers initialize with IV
     /// - AEAD Ciphers initialize with SALT
-    pub fn new(kind: CipherKind, key: &[u8], iv_or_salt: &[u8]) -> Self {
+    pub fn new(kind: CipherKind, key: &[u8], iv_or_salt: &[u8]) -> Cipher {
         let category = kind.category();
 
         match category {
@@ -239,16 +265,10 @@ impl Cipher {
                 let _ = key;
                 let _ = iv_or_salt;
 
-                let cipher = Box::new(DummyCipher::new());
-
-                Self { cipher }
+                Cipher::Dummy(DummyCipher::new())
             }
             #[cfg(feature = "v1-stream")]
-            CipherCategory::Stream => {
-                let cipher = Box::new(StreamCipher::new(kind, key, iv_or_salt));
-
-                Self { cipher }
-            }
+            CipherCategory::Stream => Cipher::Stream(StreamCipher::new(kind, key, iv_or_salt)),
             #[cfg(feature = "v1-aead")]
             CipherCategory::Aead => {
                 use crypto2::kdf::HkdfSha1;
@@ -260,26 +280,24 @@ impl Cipher {
 
                 let subkey = &okm[..ikm.len()];
 
-                let cipher = Box::new(AeadCipher::new(kind, subkey));
-
-                Self { cipher }
+                Cipher::Aead(AeadCipher::new(kind, subkey))
             }
         }
     }
 
     /// Get the `CipherCategory` of the current cipher
     pub fn category(&self) -> CipherCategory {
-        self.cipher.ss_category()
+        cipher_method_forward!(ref self, ss_category)
     }
 
     /// Get the `CipherKind` of the current cipher
     pub fn kind(&self) -> CipherKind {
-        self.cipher.ss_kind()
+        cipher_method_forward!(ref self, ss_kind)
     }
 
     /// Get the TAG length of AEAD ciphers
     pub fn tag_len(&self) -> usize {
-        self.cipher.ss_tag_len()
+        cipher_method_forward!(ref self, ss_tag_len)
     }
 
     /// Encrypt a packet. Encrypted result will be written in `pkt`
@@ -287,7 +305,7 @@ impl Cipher {
     /// - Stream Ciphers: the size of input and output packets are the same
     /// - AEAD Ciphers: the size of output must be at least `input.len() + TAG_LEN`
     pub fn encrypt_packet(&mut self, pkt: &mut [u8]) {
-        self.cipher.ss_encrypt_slice(pkt)
+        cipher_method_forward!(mut self, ss_encrypt_slice, pkt)
     }
 
     /// Decrypt a packet. Decrypted result will be written in `pkt`
@@ -296,7 +314,7 @@ impl Cipher {
     /// - AEAD Ciphers: the size of output is `input.len() - TAG_LEN`
     #[must_use]
     pub fn decrypt_packet(&mut self, pkt: &mut [u8]) -> bool {
-        self.cipher.ss_decrypt_slice(pkt)
+        cipher_method_forward!(mut self, ss_decrypt_slice, pkt)
     }
 }
 
@@ -330,4 +348,16 @@ fn test_cipher_new_stream() {
 
     let cipher = Cipher::new(kind, &key, &iv);
     assert_eq!(cipher.tag_len(), 0);
+}
+
+#[test]
+fn test_send() {
+    fn test<C: Send>() {}
+    test::<Cipher>();
+}
+
+#[test]
+fn test_sync() {
+    fn test<C: Sync>() {}
+    test::<Cipher>();
 }
