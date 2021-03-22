@@ -25,7 +25,7 @@ pub use crypto2::aeadcipher::{Aes128Gcm, Aes256Gcm, Chacha20Poly1305};
 pub use super::ring::{Aes128Gcm, Aes256Gcm, Chacha20Poly1305};
 use super::CipherKind;
 
-trait AeadCipherInner {
+trait AeadCipherExt {
     fn ac_kind(&self) -> CipherKind;
     fn ac_key_len(&self) -> usize;
     fn ac_block_len(&self) -> usize;
@@ -39,7 +39,7 @@ trait AeadCipherInner {
 
 macro_rules! impl_aead_cipher {
     ($name:tt, $kind:tt) => {
-        impl AeadCipherInner for $name {
+        impl AeadCipherExt for $name {
             fn ac_kind(&self) -> CipherKind {
                 CipherKind::$kind
             }
@@ -76,7 +76,7 @@ macro_rules! impl_aead_cipher {
 
 macro_rules! impl_siv_cmac_cipher {
     ($name:tt, $kind:tt) => {
-        impl AeadCipherInner for $name {
+        impl AeadCipherExt for $name {
             fn ac_kind(&self) -> CipherKind {
                 CipherKind::$kind
             }
@@ -137,8 +137,94 @@ impl_siv_cmac_cipher!(AesSivCmac256, AES_SIV_CMAC_256);
 impl_siv_cmac_cipher!(AesSivCmac384, AES_SIV_CMAC_384);
 impl_siv_cmac_cipher!(AesSivCmac512, AES_SIV_CMAC_512);
 
+macro_rules! aead_cipher_variant {
+    ($($name:ident @ $kind:ident,)+) => {
+        enum AeadCipherInner {
+            $($name($name),)+
+        }
+
+        impl AeadCipherInner {
+            fn new(kind: CipherKind, key: &[u8]) -> Self {
+                match kind {
+                    $(CipherKind::$kind => AeadCipherInner::$name($name::new(key)),)+
+                    _ => unreachable!("unrecognized AEAD cipher kind {:?}", kind),
+                }
+            }
+        }
+
+        impl AeadCipherExt for AeadCipherInner {
+            fn ac_kind(&self) -> CipherKind {
+                match *self {
+                    $(AeadCipherInner::$name(ref c) => c.ac_kind(),)+
+                }
+            }
+
+            fn ac_key_len(&self) -> usize {
+                match *self {
+                    $(AeadCipherInner::$name(ref c) => c.ac_key_len(),)+
+                }
+            }
+            fn ac_block_len(&self) -> usize {
+                match *self {
+                    $(AeadCipherInner::$name(ref c) => c.ac_block_len(),)+
+                }
+            }
+
+            fn ac_tag_len(&self) -> usize {
+                match *self {
+                    $(AeadCipherInner::$name(ref c) => c.ac_tag_len(),)+
+                }
+            }
+
+            fn ac_n_min(&self) -> usize {
+                match *self {
+                    $(AeadCipherInner::$name(ref c) => c.ac_n_min(),)+
+                }
+            }
+            fn ac_n_max(&self) -> usize {
+                match *self {
+                    $(AeadCipherInner::$name(ref c) => c.ac_n_max(),)+
+                }
+            }
+
+            fn ac_encrypt_slice(&self, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
+                match *self {
+                    $(AeadCipherInner::$name(ref c) => c.ac_encrypt_slice(nonce, plaintext_in_ciphertext_out),)+
+                }
+            }
+
+            fn ac_decrypt_slice(&self, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) -> bool {
+                match *self {
+                    $(AeadCipherInner::$name(ref c) => c.ac_decrypt_slice(nonce, plaintext_in_ciphertext_out),)+
+                }
+            }
+        }
+    };
+}
+
+aead_cipher_variant! {
+    Aes128Ccm @ AES_128_CCM,
+    Aes256Ccm @ AES_256_CCM,
+
+    Aes128OcbTag128 @ AES_128_OCB_TAGLEN128,
+    Aes192OcbTag128 @ AES_192_OCB_TAGLEN128,
+    Aes256OcbTag128 @ AES_256_OCB_TAGLEN128,
+
+    Aes128Gcm @ AES_128_GCM,
+    Aes256Gcm @ AES_256_GCM,
+
+    AesSivCmac256 @ AES_SIV_CMAC_256,
+    AesSivCmac384 @ AES_SIV_CMAC_384,
+    AesSivCmac512 @ AES_SIV_CMAC_512,
+
+    Aes128GcmSiv @ AES_128_GCM_SIV,
+    Aes256GcmSiv @ AES_256_GCM_SIV,
+
+    Chacha20Poly1305 @ CHACHA20_POLY1305,
+}
+
 pub struct AeadCipher {
-    cipher: Box<dyn AeadCipherInner + Send + 'static>,
+    cipher: AeadCipherInner,
     nlen: usize,
     nonce: [u8; Self::N_MAX],
 }
@@ -147,27 +233,8 @@ impl AeadCipher {
     const N_MAX: usize = 16;
 
     pub fn new(kind: CipherKind, key: &[u8]) -> Self {
-        use self::CipherKind::*;
-
-        let cipher: Box<dyn AeadCipherInner + Send + 'static> = match kind {
-            AES_128_CCM => Box::new(Aes128Ccm::new(key)),
-            AES_256_CCM => Box::new(Aes256Ccm::new(key)),
-            AES_128_OCB_TAGLEN128 => Box::new(Aes128OcbTag128::new(key)),
-            AES_192_OCB_TAGLEN128 => Box::new(Aes192OcbTag128::new(key)),
-            AES_256_OCB_TAGLEN128 => Box::new(Aes256OcbTag128::new(key)),
-            AES_128_GCM => Box::new(Aes128Gcm::new(key)),
-            AES_256_GCM => Box::new(Aes256Gcm::new(key)),
-            AES_SIV_CMAC_256 => Box::new(AesSivCmac256::new(key)),
-            AES_SIV_CMAC_384 => Box::new(AesSivCmac384::new(key)),
-            AES_SIV_CMAC_512 => Box::new(AesSivCmac512::new(key)),
-            AES_128_GCM_SIV => Box::new(Aes128GcmSiv::new(key)),
-            AES_256_GCM_SIV => Box::new(Aes256GcmSiv::new(key)),
-            CHACHA20_POLY1305 => Box::new(Chacha20Poly1305::new(key)),
-            _ => unreachable!(),
-        };
-
+        let cipher = AeadCipherInner::new(kind, key);
         let nlen = std::cmp::min(cipher.ac_n_max(), Self::N_MAX);
-
         let nonce = [0u8; Self::N_MAX];
 
         Self {

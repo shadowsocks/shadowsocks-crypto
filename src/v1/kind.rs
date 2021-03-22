@@ -545,10 +545,14 @@ impl core::fmt::Display for CipherKind {
     }
 }
 
-impl core::str::FromStr for CipherKind {
-    type Err = std::io::Error;
+/// Error while parsing `CipherKind` from string
+#[derive(Debug, Clone)]
+pub struct ParseCipherKindError;
 
-    fn from_str(s: &str) -> Result<Self, std::io::Error> {
+impl core::str::FromStr for CipherKind {
+    type Err = ParseCipherKindError;
+
+    fn from_str(s: &str) -> Result<Self, ParseCipherKindError> {
         use self::CipherKind::*;
 
         match s.to_lowercase().as_str() {
@@ -664,10 +668,7 @@ impl core::str::FromStr for CipherKind {
             // "aes-siv-cmac-256" => Ok(AES_SIV_CMAC_256),
             // "aes-siv-cmac-384" => Ok(AES_SIV_CMAC_384),
             // "aes-siv-cmac-512" => Ok(AES_SIV_CMAC_512),
-            _ => Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                "unknown cipher type",
-            )),
+            _ => Err(ParseCipherKindError),
         }
     }
 }
