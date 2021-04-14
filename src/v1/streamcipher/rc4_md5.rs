@@ -1,6 +1,6 @@
-use crypto2::hash::Md5;
 use crypto2::mem::Zeroize;
 use crypto2::streamcipher::Rc4;
+use md5::Context as Md5;
 
 /// Rc4Md5 Cipher
 #[derive(Clone)]
@@ -37,10 +37,10 @@ impl Rc4Md5 {
         assert_eq!(salt.len(), Self::IV_LEN);
 
         let mut m = Md5::new();
-        m.update(key);
-        m.update(salt);
+        m.consume(key);
+        m.consume(salt);
 
-        let key = m.finalize();
+        let key = m.compute().0;
 
         let cipher = Rc4::new(&key);
 

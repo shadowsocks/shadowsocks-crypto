@@ -6,7 +6,7 @@ use super::streamcipher::StreamCipher;
 use super::CipherCategory;
 use super::CipherKind;
 
-use crypto2::hash::Md5;
+use md5::Context as Md5;
 
 /// Get available ciphers in string representation
 ///
@@ -132,26 +132,69 @@ pub fn random_iv_or_salt(iv_or_salt: &mut [u8]) {
 pub fn openssl_bytes_to_key(password: &[u8], key: &mut [u8]) {
     let key_len = key.len();
 
-    let mut last_digest: Option<[u8; Md5::DIGEST_LEN]> = None;
+    let mut last_digest: Option<[u8; 16]> = None;
 
     let mut offset = 0usize;
     while offset < key_len {
         let mut m = Md5::new();
         if let Some(digest) = last_digest {
-            m.update(&digest);
+            m.consume(&digest);
         }
 
-        m.update(password);
+        m.consume(password);
 
-        let digest = m.finalize();
+        let digest = m.compute().0;
 
-        let amt = std::cmp::min(key_len - offset, Md5::DIGEST_LEN);
+        let amt = std::cmp::min(key_len - offset, 16);
         key[offset..offset + amt].copy_from_slice(&digest[..amt]);
 
-        offset += Md5::DIGEST_LEN;
+        offset += amt;
         last_digest = Some(digest);
     }
 }
+
+/// FIXME: Remove the test after the bug is fixed.
+#[cfg(test)]
+pub mod test {
+    #[test]
+    pub fn crypto2_crate_should_fail() {
+        use crypto2::hash::Md5 as Md5;
+
+        let magic_a = hex::decode("4b01a2d762fada9ede4d1034a13dc69c").unwrap();
+        let magic_b = hex::decode("496d616b65746869735f4c6f6e6750617373506872617365466f725f7361666574795f323031395f30393238405f4021").unwrap();
+        let mut c1 = Md5::new();
+        c1.update(&magic_a);
+        c1.update(&magic_b);
+        let h1 = c1.finalize();
+
+        let magic_ab = hex::decode("4b01a2d762fada9ede4d1034a13dc69c496d616b65746869735f4c6f6e6750617373506872617365466f725f7361666574795f323031395f30393238405f4021").unwrap();
+        let mut c2 = Md5::new();
+        c2.update(&magic_ab);
+        let h2 = c2.finalize();
+
+        assert_ne!(h1, h2);
+    }
+
+    #[test]
+    pub fn md5_crate_should_pass() {
+        use md5::Context as Md5;
+
+        let magic_a = hex::decode("4b01a2d762fada9ede4d1034a13dc69c").unwrap();
+        let magic_b = hex::decode("496d616b65746869735f4c6f6e6750617373506872617365466f725f7361666574795f323031395f30393238405f4021").unwrap();
+        let mut c1 = Md5::new();
+        c1.consume(magic_a);
+        c1.consume(magic_b);
+        let h1 = c1.compute().0;
+
+        let magic_ab = hex::decode("4b01a2d762fada9ede4d1034a13dc69c496d616b65746869735f4c6f6e6750617373506872617365466f725f7361666574795f323031395f30393238405f4021").unwrap();
+        let mut c2 = Md5::new();
+        c2.consume(magic_ab);
+        let h2 = c2.compute().0;
+
+        assert_eq!(h1, h2);
+    }
+}
+
 
 trait CipherInner {
     fn ss_kind(&self) -> CipherKind;

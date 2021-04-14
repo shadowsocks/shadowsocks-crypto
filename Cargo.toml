@@ -14,6 +14,7 @@ documentation = "https://docs.rs/shadowsocks-crypto"
 [dependencies]
 rand    = "0.8"
 crypto2 = "0.1"
+md5 = "0.7"
 
 
 [target.'cfg(any(target_arch = "x86", target_arch = "x86_64"))'.dependencies]
