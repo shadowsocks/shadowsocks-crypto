@@ -12,8 +12,11 @@ impl Aes128Gcm {
     pub const NONCE_LEN: usize = 12;
     pub const TAG_LEN: usize = 16;
 
+    #[allow(dead_code)]
     pub const A_MAX: usize = 2305843009213693951; // 2 ** 61
+    #[allow(dead_code)]
     pub const P_MAX: usize = 68719476735; // 2^36 - 31
+    #[allow(dead_code)]
     pub const C_MAX: usize = 68719476721; // 2^36 - 15
     pub const N_MIN: usize = Self::NONCE_LEN;
     pub const N_MAX: usize = Self::NONCE_LEN;
@@ -77,8 +80,11 @@ impl Aes256Gcm {
     pub const NONCE_LEN: usize = 12;
     pub const TAG_LEN: usize = 16;
 
+    #[allow(dead_code)]
     pub const A_MAX: usize = 2305843009213693951; // 2 ** 61
+    #[allow(dead_code)]
     pub const P_MAX: usize = 68719476735; // 2^36 - 31
+    #[allow(dead_code)]
     pub const C_MAX: usize = 68719476721; // 2^36 - 15
     pub const N_MIN: usize = Self::NONCE_LEN;
     pub const N_MAX: usize = Self::NONCE_LEN;
@@ -142,8 +148,11 @@ impl Chacha20Poly1305 {
     pub const NONCE_LEN: usize = 12;
     pub const TAG_LEN: usize = 16;
 
+    #[allow(dead_code)]
     pub const A_MAX: usize = usize::MAX; // 2^32 - 1
+    #[allow(dead_code)]
     pub const P_MAX: usize = 274877906880; // (2^32 - 1) * BLOCK_LEN
+    #[allow(dead_code)]
     pub const C_MAX: usize = Self::P_MAX + Self::TAG_LEN; // 274,877,906,896
     pub const N_MIN: usize = Self::NONCE_LEN;
     pub const N_MAX: usize = Self::NONCE_LEN;

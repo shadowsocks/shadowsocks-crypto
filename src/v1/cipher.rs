@@ -19,7 +19,7 @@ pub const fn available_ciphers() -> &'static [&'static str] {
         "table",
         #[cfg(feature = "v1-stream")]
         "rc4-md5",
-        // 序列密码
+        // Stream Ciphers
         #[cfg(feature = "v1-stream")]
         "aes-128-ctr",
         #[cfg(feature = "v1-stream")]
@@ -96,18 +96,33 @@ pub const fn available_ciphers() -> &'static [&'static str] {
         "rc4",
         #[cfg(feature = "v1-stream")]
         "chacha20-ietf",
-        // AEAD 密码算法
+        // AEAD Ciphers
         #[cfg(feature = "v1-aead")]
         "aes-128-gcm",
         #[cfg(feature = "v1-aead")]
         "aes-256-gcm",
         #[cfg(feature = "v1-aead")]
         "chacha20-ietf-poly1305",
-        // NOTE: 也许将来会开启的密码算法。
-        // "aes-128-ccm", "aes-256-ccm",
-        // "aes-128-gcm-siv", "aes-256-gcm-siv",
-        // "aes-128-ocb-taglen128", "aes-192-ocb-taglen128", "aes-256-ocb-taglen128",
-        // "aes-siv-cmac-256", "aes-siv-cmac-384", "aes-siv-cmac-512",
+        #[cfg(feature = "v1-aead-extra")]
+        "aes-128-ccm",
+        #[cfg(feature = "v1-aead-extra")]
+        "aes-256-ccm",
+        #[cfg(feature = "v1-aead-extra")]
+        "aes-128-gcm-siv",
+        #[cfg(feature = "v1-aead-extra")]
+        "aes-256-gcm-siv",
+        #[cfg(feature = "v1-aead-extra")]
+        "aes-128-ocb-taglen128",
+        #[cfg(feature = "v1-aead-extra")]
+        "aes-192-ocb-taglen128",
+        #[cfg(feature = "v1-aead-extra")]
+        "aes-256-ocb-taglen128",
+        #[cfg(feature = "v1-aead-extra")]
+        "aes-siv-cmac-256",
+        #[cfg(feature = "v1-aead-extra")]
+        "aes-siv-cmac-384",
+        #[cfg(feature = "v1-aead-extra")]
+        "aes-siv-cmac-512",
     ]
 }
 
