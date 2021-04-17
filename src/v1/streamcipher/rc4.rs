@@ -1,7 +1,7 @@
 //! RC4 Source Code
-//! http://cypherpunks.venona.com/archive/1994/09/msg00304.html
+//! <http://cypherpunks.venona.com/archive/1994/09/msg00304.html>
 //!
-//! https://en.wikipedia.org/wiki/RC4
+//! <https://en.wikipedia.org/wiki/RC4>
 
 #[derive(Clone)]
 pub struct Rc4 {
