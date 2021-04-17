@@ -22,8 +22,13 @@ pub use crypto2::aeadcipher::{Aes128Gcm, Aes256Gcm, Chacha20Poly1305};
     ),
     feature = "ring"
 ))]
-pub use super::ring::{Aes128Gcm, Aes256Gcm, Chacha20Poly1305};
-use super::CipherKind;
+pub use crate::v1::ring::{Aes128Gcm, Aes256Gcm, Chacha20Poly1305};
+use crate::v1::CipherKind;
+
+#[cfg(feature = "v1-aead-extra")]
+pub mod xchacha20_poly1305;
+#[cfg(feature = "v1-aead-extra")]
+pub use self::xchacha20_poly1305::XChacha20Poly1305;
 
 trait AeadCipherExt {
     fn ac_kind(&self) -> CipherKind;
@@ -74,6 +79,7 @@ macro_rules! impl_aead_cipher {
     };
 }
 
+#[cfg(feature = "v1-aead-extra")]
 macro_rules! impl_siv_cmac_cipher {
     ($name:tt, $kind:tt) => {
         impl AeadCipherExt for $name {
@@ -119,34 +125,54 @@ macro_rules! impl_siv_cmac_cipher {
     };
 }
 
+#[cfg(feature = "v1-aead-extra")]
 impl_aead_cipher!(Aes128Ccm, AES_128_CCM);
+#[cfg(feature = "v1-aead-extra")]
 impl_aead_cipher!(Aes256Ccm, AES_256_CCM);
+
 impl_aead_cipher!(Aes128Gcm, AES_128_GCM);
 impl_aead_cipher!(Aes256Gcm, AES_256_GCM);
 
+#[cfg(feature = "v1-aead-extra")]
 impl_aead_cipher!(Aes128GcmSiv, AES_128_GCM_SIV);
+#[cfg(feature = "v1-aead-extra")]
 impl_aead_cipher!(Aes256GcmSiv, AES_256_GCM_SIV);
 
+#[cfg(feature = "v1-aead-extra")]
 impl_aead_cipher!(Aes128OcbTag128, AES_128_OCB_TAGLEN128);
+#[cfg(feature = "v1-aead-extra")]
 impl_aead_cipher!(Aes192OcbTag128, AES_192_OCB_TAGLEN128);
+#[cfg(feature = "v1-aead-extra")]
 impl_aead_cipher!(Aes256OcbTag128, AES_256_OCB_TAGLEN128);
 
 impl_aead_cipher!(Chacha20Poly1305, CHACHA20_POLY1305);
 
+#[cfg(feature = "v1-aead-extra")]
 impl_siv_cmac_cipher!(AesSivCmac256, AES_SIV_CMAC_256);
+#[cfg(feature = "v1-aead-extra")]
 impl_siv_cmac_cipher!(AesSivCmac384, AES_SIV_CMAC_384);
+#[cfg(feature = "v1-aead-extra")]
 impl_siv_cmac_cipher!(AesSivCmac512, AES_SIV_CMAC_512);
 
+#[cfg(feature = "v1-aead-extra")]
+impl_aead_cipher!(XChacha20Poly1305, XCHACHA20_POLY1305);
+
 macro_rules! aead_cipher_variant {
-    ($($name:ident @ $kind:ident,)+) => {
+    ($($(#[cfg($i_meta:meta)])? $name:ident @ $kind:ident,)+) => {
         enum AeadCipherInner {
-            $($name($name),)+
+            $(
+                $(#[cfg($i_meta)])?
+                $name($name),
+            )+
         }
 
         impl AeadCipherInner {
             fn new(kind: CipherKind, key: &[u8]) -> Self {
                 match kind {
-                    $(CipherKind::$kind => AeadCipherInner::$name($name::new(key)),)+
+                    $(
+                        $(#[cfg($i_meta)])?
+                        CipherKind::$kind => AeadCipherInner::$name($name::new(key)),
+                    )+
                     _ => unreachable!("unrecognized AEAD cipher kind {:?}", kind),
                 }
             }
@@ -155,47 +181,71 @@ macro_rules! aead_cipher_variant {
         impl AeadCipherExt for AeadCipherInner {
             fn ac_kind(&self) -> CipherKind {
                 match *self {
-                    $(AeadCipherInner::$name(ref c) => c.ac_kind(),)+
+                    $(
+                        $(#[cfg($i_meta)])?
+                        AeadCipherInner::$name(ref c) => c.ac_kind(),
+                    )+
                 }
             }
 
             fn ac_key_len(&self) -> usize {
                 match *self {
-                    $(AeadCipherInner::$name(ref c) => c.ac_key_len(),)+
+                    $(
+                        $(#[cfg($i_meta)])?
+                        AeadCipherInner::$name(ref c) => c.ac_key_len(),
+                    )+
                 }
             }
             fn ac_block_len(&self) -> usize {
                 match *self {
-                    $(AeadCipherInner::$name(ref c) => c.ac_block_len(),)+
+                    $(
+                        $(#[cfg($i_meta)])?
+                        AeadCipherInner::$name(ref c) => c.ac_block_len(),
+                    )+
                 }
             }
 
             fn ac_tag_len(&self) -> usize {
                 match *self {
-                    $(AeadCipherInner::$name(ref c) => c.ac_tag_len(),)+
+                    $(
+                        $(#[cfg($i_meta)])?
+                        AeadCipherInner::$name(ref c) => c.ac_tag_len(),
+                    )+
                 }
             }
 
             fn ac_n_min(&self) -> usize {
                 match *self {
-                    $(AeadCipherInner::$name(ref c) => c.ac_n_min(),)+
+                    $(
+                        $(#[cfg($i_meta)])?
+                        AeadCipherInner::$name(ref c) => c.ac_n_min(),
+                    )+
                 }
             }
             fn ac_n_max(&self) -> usize {
                 match *self {
-                    $(AeadCipherInner::$name(ref c) => c.ac_n_max(),)+
+                    $(
+                        $(#[cfg($i_meta)])?
+                        AeadCipherInner::$name(ref c) => c.ac_n_max(),
+                    )+
                 }
             }
 
             fn ac_encrypt_slice(&self, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
                 match *self {
-                    $(AeadCipherInner::$name(ref c) => c.ac_encrypt_slice(nonce, plaintext_in_ciphertext_out),)+
+                    $(
+                        $(#[cfg($i_meta)])?
+                        AeadCipherInner::$name(ref c) => c.ac_encrypt_slice(nonce, plaintext_in_ciphertext_out),
+                    )+
                 }
             }
 
             fn ac_decrypt_slice(&self, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) -> bool {
                 match *self {
-                    $(AeadCipherInner::$name(ref c) => c.ac_decrypt_slice(nonce, plaintext_in_ciphertext_out),)+
+                    $(
+                        $(#[cfg($i_meta)])?
+                        AeadCipherInner::$name(ref c) => c.ac_decrypt_slice(nonce, plaintext_in_ciphertext_out),
+                    )+
                 }
             }
         }
@@ -203,24 +253,26 @@ macro_rules! aead_cipher_variant {
 }
 
 aead_cipher_variant! {
-    Aes128Ccm @ AES_128_CCM,
-    Aes256Ccm @ AES_256_CCM,
+    #[cfg(feature = "v1-aead-extra")] Aes128Ccm @ AES_128_CCM,
+    #[cfg(feature = "v1-aead-extra")] Aes256Ccm @ AES_256_CCM,
 
-    Aes128OcbTag128 @ AES_128_OCB_TAGLEN128,
-    Aes192OcbTag128 @ AES_192_OCB_TAGLEN128,
-    Aes256OcbTag128 @ AES_256_OCB_TAGLEN128,
+    #[cfg(feature = "v1-aead-extra")] Aes128OcbTag128 @ AES_128_OCB_TAGLEN128,
+    #[cfg(feature = "v1-aead-extra")] Aes192OcbTag128 @ AES_192_OCB_TAGLEN128,
+    #[cfg(feature = "v1-aead-extra")] Aes256OcbTag128 @ AES_256_OCB_TAGLEN128,
 
     Aes128Gcm @ AES_128_GCM,
     Aes256Gcm @ AES_256_GCM,
 
-    AesSivCmac256 @ AES_SIV_CMAC_256,
-    AesSivCmac384 @ AES_SIV_CMAC_384,
-    AesSivCmac512 @ AES_SIV_CMAC_512,
+    #[cfg(feature = "v1-aead-extra")] AesSivCmac256 @ AES_SIV_CMAC_256,
+    #[cfg(feature = "v1-aead-extra")] AesSivCmac384 @ AES_SIV_CMAC_384,
+    #[cfg(feature = "v1-aead-extra")] AesSivCmac512 @ AES_SIV_CMAC_512,
 
-    Aes128GcmSiv @ AES_128_GCM_SIV,
-    Aes256GcmSiv @ AES_256_GCM_SIV,
+    #[cfg(feature = "v1-aead-extra")] Aes128GcmSiv @ AES_128_GCM_SIV,
+    #[cfg(feature = "v1-aead-extra")] Aes256GcmSiv @ AES_256_GCM_SIV,
 
     Chacha20Poly1305 @ CHACHA20_POLY1305,
+
+    #[cfg(feature = "v1-aead-extra")] XChacha20Poly1305 @ XCHACHA20_POLY1305,
 }
 
 pub struct AeadCipher {

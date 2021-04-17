@@ -1,5 +1,3 @@
-use crypto2::mem::Zeroize;
-
 /// ChaCha20 for IETF Protocols
 ///
 /// https://tools.ietf.org/html/rfc8439
@@ -8,20 +6,6 @@ pub struct Chacha20 {
     cipher: crypto2::streamcipher::Chacha20,
     nonce: [u8; Self::NONCE_LEN],
     len: u64,
-}
-
-impl Zeroize for Chacha20 {
-    fn zeroize(&mut self) {
-        self.cipher.zeroize();
-        self.nonce.zeroize();
-        self.len.zeroize()
-    }
-}
-
-impl Drop for Chacha20 {
-    fn drop(&mut self) {
-        self.zeroize();
-    }
 }
 
 impl Chacha20 {

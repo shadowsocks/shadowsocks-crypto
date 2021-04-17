@@ -1,23 +1,10 @@
 use crypto2::hash::Md5;
-use crypto2::mem::Zeroize;
 use crypto2::streamcipher::Rc4;
 
 /// Rc4Md5 Cipher
 #[derive(Clone)]
 pub struct Rc4Md5 {
     cipher: Rc4,
-}
-
-impl Zeroize for Rc4Md5 {
-    fn zeroize(&mut self) {
-        self.cipher.zeroize();
-    }
-}
-
-impl Drop for Rc4Md5 {
-    fn drop(&mut self) {
-        self.zeroize();
-    }
 }
 
 impl core::fmt::Debug for Rc4Md5 {

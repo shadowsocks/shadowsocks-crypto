@@ -1,7 +1,6 @@
 // 6.3 The Cipher Feedback Mode, (Page-18)
 // https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf
 use crypto2::blockcipher::{Aes128, Aes192, Aes256, Camellia128, Camellia192, Camellia256};
-use crypto2::mem::Zeroize;
 
 #[derive(Debug, Clone, Copy)]
 struct Bits(pub u8);
@@ -46,19 +45,6 @@ macro_rules! impl_block_cipher_with_cfb1_mode {
         pub struct $name {
             cipher: $cipher,
             last_input_block: [u8; Self::BLOCK_LEN],
-        }
-
-        impl Zeroize for $name {
-            fn zeroize(&mut self) {
-                self.cipher.zeroize();
-                self.last_input_block.zeroize();
-            }
-        }
-
-        impl Drop for $name {
-            fn drop(&mut self) {
-                self.zeroize();
-            }
         }
 
         impl $name {
@@ -136,19 +122,6 @@ macro_rules! impl_block_cipher_with_cfb8_mode {
             last_input_block: [u8; Self::BLOCK_LEN],
         }
 
-        impl Zeroize for $name {
-            fn zeroize(&mut self) {
-                self.cipher.zeroize();
-                self.last_input_block.zeroize();
-            }
-        }
-
-        impl Drop for $name {
-            fn drop(&mut self) {
-                self.zeroize();
-            }
-        }
-
         impl $name {
             pub const KEY_LEN: usize = $cipher::KEY_LEN;
             pub const BLOCK_LEN: usize = $cipher::BLOCK_LEN;
@@ -221,21 +194,6 @@ macro_rules! impl_block_cipher_with_cfb128_mode {
             last_input_block: [u8; Self::BLOCK_LEN],
             keystream: [u8; Self::BLOCK_LEN],
             offset: usize,
-        }
-
-        impl Zeroize for $name {
-            fn zeroize(&mut self) {
-                self.cipher.zeroize();
-                self.last_input_block.zeroize();
-                self.keystream.zeroize();
-                self.offset.zeroize();
-            }
-        }
-
-        impl Drop for $name {
-            fn drop(&mut self) {
-                self.zeroize();
-            }
         }
 
         impl $name {
