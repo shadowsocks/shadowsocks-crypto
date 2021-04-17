@@ -1,7 +1,6 @@
 // 6.5 The Counter Mode, (Page-22)
 // https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf
 use crypto2::blockcipher::{Aes128, Aes192, Aes256, Camellia128, Camellia192, Camellia256};
-use crypto2::mem::Zeroize;
 
 macro_rules! impl_block_cipher_with_ctr_mode {
     ($name:tt, $cipher:tt) => {
@@ -11,21 +10,6 @@ macro_rules! impl_block_cipher_with_ctr_mode {
             counter_block: [u8; Self::BLOCK_LEN],
             keystream: [u8; Self::BLOCK_LEN],
             offset: usize,
-        }
-
-        impl Zeroize for $name {
-            fn zeroize(&mut self) {
-                self.cipher.zeroize();
-                self.counter_block.zeroize();
-                self.keystream.zeroize();
-                self.offset.zeroize();
-            }
-        }
-
-        impl Drop for $name {
-            fn drop(&mut self) {
-                self.zeroize();
-            }
         }
 
         impl $name {

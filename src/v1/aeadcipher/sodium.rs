@@ -11,23 +11,10 @@ use libsodium_sys::{
     crypto_aead_xchacha20poly1305_ietf_encrypt_detached,
 };
 
-use crypto2::mem::Zeroize;
 use crypto2::streamcipher::Chacha20;
 
 pub struct XChacha20Poly1305 {
     ek: [u8; Self::KEY_LEN],
-}
-
-impl Zeroize for XChacha20Poly1305 {
-    fn zeroize(&mut self) {
-        self.ek.zeroize()
-    }
-}
-
-impl Drop for XChacha20Poly1305 {
-    fn drop(&mut self) {
-        self.zeroize()
-    }
 }
 
 impl XChacha20Poly1305 {

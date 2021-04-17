@@ -1,24 +1,10 @@
 use crypto2::hash::Md5;
-use crypto2::mem::Zeroize;
 
 /// Table cipher
 #[derive(Clone)]
 pub struct Table {
     ebox: [u8; Self::TABLE_SIZE], // Encrypt
     dbox: [u8; Self::TABLE_SIZE], // Decrypt
-}
-
-impl Zeroize for Table {
-    fn zeroize(&mut self) {
-        self.ebox.zeroize();
-        self.dbox.zeroize();
-    }
-}
-
-impl Drop for Table {
-    fn drop(&mut self) {
-        self.zeroize();
-    }
 }
 
 impl core::fmt::Debug for Table {

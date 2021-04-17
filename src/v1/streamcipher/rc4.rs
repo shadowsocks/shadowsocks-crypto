@@ -1,24 +1,11 @@
-// RC4 Source Code
-// http://cypherpunks.venona.com/archive/1994/09/msg00304.html
-//
-// https://en.wikipedia.org/wiki/RC4
-use crypto2::mem::Zeroize;
+//! RC4 Source Code
+//! http://cypherpunks.venona.com/archive/1994/09/msg00304.html
+//!
+//! https://en.wikipedia.org/wiki/RC4
 
 #[derive(Clone)]
 pub struct Rc4 {
     cipher: crypto2::streamcipher::Rc4,
-}
-
-impl Zeroize for Rc4 {
-    fn zeroize(&mut self) {
-        self.cipher.zeroize();
-    }
-}
-
-impl Drop for Rc4 {
-    fn drop(&mut self) {
-        self.zeroize();
-    }
 }
 
 impl Rc4 {
