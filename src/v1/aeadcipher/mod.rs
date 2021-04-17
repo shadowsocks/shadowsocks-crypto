@@ -25,6 +25,9 @@ pub use crypto2::aeadcipher::{Aes128Gcm, Aes256Gcm, Chacha20Poly1305};
 pub use crate::v1::ring::{Aes128Gcm, Aes256Gcm, Chacha20Poly1305};
 use crate::v1::CipherKind;
 
+
+pub mod xchacha20_poly1305;
+
 #[cfg(feature = "v1-aead-extra")]
 mod sodium;
 #[cfg(feature = "v1-aead-extra")]
