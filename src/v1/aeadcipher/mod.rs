@@ -282,8 +282,8 @@ pub struct AeadCipher {
 }
 
 impl AeadCipher {
-    const N_MAX: usize = 16;
-
+    const N_MAX: usize = 24;
+    
     pub fn new(kind: CipherKind, key: &[u8]) -> Self {
         let cipher = AeadCipherInner::new(kind, key);
         let nlen = std::cmp::min(cipher.ac_n_max(), Self::N_MAX);
