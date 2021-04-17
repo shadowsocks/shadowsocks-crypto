@@ -1,6 +1,6 @@
 pub use crypto2::aeadcipher::{
     Aes128Ccm, Aes128GcmSiv, Aes128OcbTag128, Aes192OcbTag128, Aes256Ccm, Aes256GcmSiv,
-    Aes256OcbTag128, AesSivCmac256, AesSivCmac384, AesSivCmac512,
+    Aes256OcbTag128, AesSivCmac256, AesSivCmac384, AesSivCmac512, Sm4Ccm, Sm4Gcm,
 };
 #[cfg(not(all(
     any(
@@ -157,6 +157,11 @@ impl_siv_cmac_cipher!(AesSivCmac512, AES_SIV_CMAC_512);
 #[cfg(feature = "v1-aead-extra")]
 impl_aead_cipher!(XChacha20Poly1305, XCHACHA20_POLY1305);
 
+#[cfg(feature = "v1-aead-extra")]
+impl_aead_cipher!(Sm4Gcm, SM4_GCM);
+#[cfg(feature = "v1-aead-extra")]
+impl_aead_cipher!(Sm4Ccm, SM4_CCM);
+
 macro_rules! aead_cipher_variant {
     ($($(#[cfg($i_meta:meta)])? $name:ident @ $kind:ident,)+) => {
         enum AeadCipherInner {
@@ -273,6 +278,9 @@ aead_cipher_variant! {
     Chacha20Poly1305 @ CHACHA20_POLY1305,
 
     #[cfg(feature = "v1-aead-extra")] XChacha20Poly1305 @ XCHACHA20_POLY1305,
+
+    #[cfg(feature = "v1-aead-extra")] Sm4Gcm @ SM4_GCM,
+    #[cfg(feature = "v1-aead-extra")] Sm4Ccm @ SM4_CCM,
 }
 
 pub struct AeadCipher {
@@ -283,7 +291,7 @@ pub struct AeadCipher {
 
 impl AeadCipher {
     const N_MAX: usize = 24;
-    
+
     pub fn new(kind: CipherKind, key: &[u8]) -> Self {
         let cipher = AeadCipherInner::new(kind, key);
         let nlen = std::cmp::min(cipher.ac_n_max(), Self::N_MAX);

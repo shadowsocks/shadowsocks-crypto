@@ -3,7 +3,8 @@
 #[cfg(feature = "v1-aead-extra")]
 use super::aeadcipher::{
     Aes128Ccm, Aes128GcmSiv, Aes128OcbTag128, Aes192OcbTag128, Aes256Ccm, Aes256GcmSiv,
-    Aes256OcbTag128, AesSivCmac256, AesSivCmac384, AesSivCmac512, XChacha20Poly1305,
+    Aes256OcbTag128, AesSivCmac256, AesSivCmac384, AesSivCmac512, Sm4Ccm, Sm4Gcm,
+    XChacha20Poly1305,
 };
 #[cfg(feature = "v1-aead")]
 use super::aeadcipher::{Aes128Gcm, Aes256Gcm, Chacha20Poly1305};
@@ -242,6 +243,15 @@ pub enum CipherKind {
     #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
     /// AEAD_XCHACHA20_POLY1305
     XCHACHA20_POLY1305,
+
+    #[cfg(feature = "v1-aead-extra")]
+    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
+    /// AEAD_SM4_GCM
+    SM4_GCM,
+    #[cfg(feature = "v1-aead-extra")]
+    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
+    /// AEAD_SM4_CCM
+    SM4_CCM,
 }
 
 impl CipherKind {
@@ -303,7 +313,9 @@ impl CipherKind {
             | AES_SIV_CMAC_512
             | AES_128_GCM_SIV
             | AES_256_GCM_SIV
-            | XCHACHA20_POLY1305 => true,
+            | XCHACHA20_POLY1305
+            | SM4_GCM
+            | SM4_CCM => true,
 
             _ => false,
         }
@@ -431,6 +443,11 @@ impl CipherKind {
 
             #[cfg(feature = "v1-aead-extra")]
             XCHACHA20_POLY1305 => XChacha20Poly1305::KEY_LEN,
+
+            #[cfg(feature = "v1-aead-extra")]
+            SM4_GCM => Sm4Gcm::KEY_LEN,
+            #[cfg(feature = "v1-aead-extra")]
+            SM4_CCM => Sm4Ccm::KEY_LEN,
         }
     }
 
@@ -524,6 +541,11 @@ impl CipherKind {
 
             #[cfg(feature = "v1-aead-extra")]
             XCHACHA20_POLY1305 => XChacha20Poly1305::TAG_LEN,
+
+            #[cfg(feature = "v1-aead-extra")]
+            SM4_GCM => Sm4Gcm::TAG_LEN,
+            #[cfg(feature = "v1-aead-extra")]
+            SM4_CCM => Sm4Ccm::TAG_LEN,
 
             _ => panic!("only support AEAD ciphers"),
         }
@@ -659,6 +681,11 @@ impl core::fmt::Display for CipherKind {
 
             #[cfg(feature = "v1-aead-extra")]
             CipherKind::XCHACHA20_POLY1305 => "xchacha20-ietf-poly1305",
+
+            #[cfg(feature = "v1-aead-extra")]
+            CipherKind::SM4_GCM => "sm4-gcm",
+            #[cfg(feature = "v1-aead-extra")]
+            CipherKind::SM4_CCM => "sm4-ccm",
         })
     }
 }
@@ -802,6 +829,11 @@ impl core::str::FromStr for CipherKind {
 
             #[cfg(feature = "v1-aead-extra")]
             "xchacha20-ietf-poly1305" => Ok(XCHACHA20_POLY1305),
+
+            #[cfg(feature = "v1-aead-extra")]
+            "sm4-gcm" => Ok(SM4_GCM),
+            #[cfg(feature = "v1-aead-extra")]
+            "sm4-ccm" => Ok(SM4_CCM),
 
             _ => Err(ParseCipherKindError),
         }

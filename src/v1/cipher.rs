@@ -125,6 +125,10 @@ pub const fn available_ciphers() -> &'static [&'static str] {
         "aes-siv-cmac-512",
         #[cfg(feature = "v1-aead-extra")]
         "xchacha20-ietf-poly1305",
+        #[cfg(feature = "v1-aead-extra")]
+        "sm4-gcm",
+        #[cfg(feature = "v1-aead-extra")]
+        "sm4-ccm",
     ]
 }
 
