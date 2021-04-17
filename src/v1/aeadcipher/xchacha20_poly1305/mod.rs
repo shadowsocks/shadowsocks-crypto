@@ -27,10 +27,18 @@ impl XChacha20Poly1305 {
     #[cfg(target_pointer_width = "32")]
     pub const A_MAX: usize = usize::MAX; // 2^32 - 1
 
+    #[cfg(target_pointer_width = "64")]
     pub const P_MAX: usize = 274877906880; // (2^32 - 1) * BLOCK_LEN
-    #[allow(dead_code)]
-    pub const C_MAX: usize = Self::P_MAX + Self::TAG_LEN; // 274,877,906,896
+    #[cfg(target_pointer_width = "32")]
+    pub const P_MAX: usize = usize::MAX;   // 2^32 - 1
 
+    #[allow(dead_code)]
+    #[cfg(target_pointer_width = "64")]
+    pub const C_MAX: usize = Self::P_MAX + Self::TAG_LEN; // 274,877,906,896
+    #[allow(dead_code)]
+    #[cfg(target_pointer_width = "32")]
+    pub const C_MAX: usize = Self::P_MAX - Self::TAG_LEN; // 4294967279
+    
     pub const N_MIN: usize = Self::NONCE_LEN;
     pub const N_MAX: usize = Self::NONCE_LEN;
 
