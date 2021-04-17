@@ -291,8 +291,8 @@ impl AeadCipher {
 
         Self {
             cipher,
-            nonce,
             nlen,
+            nonce,
         }
     }
 

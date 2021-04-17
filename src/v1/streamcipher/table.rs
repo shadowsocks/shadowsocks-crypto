@@ -21,8 +21,8 @@ impl Table {
         let a = u64::from_le_bytes([h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7]]);
 
         let mut table = [0u64; Self::TABLE_SIZE];
-        for i in 0..Self::TABLE_SIZE {
-            table[i] = i as u64;
+        for (i, item) in table.iter_mut().enumerate().take(Self::TABLE_SIZE) {
+            *item = i as u64;
         }
 
         for i in 1..1024 {
@@ -45,18 +45,14 @@ impl Table {
     }
 
     pub fn encryptor_update(&self, plaintext_in_ciphertext_out: &mut [u8]) {
-        let plen = plaintext_in_ciphertext_out.len();
-        for i in 0..plen {
-            let v = plaintext_in_ciphertext_out[i];
-            plaintext_in_ciphertext_out[i] = self.ebox[v as usize];
+        for item in plaintext_in_ciphertext_out.iter_mut() {
+            *item = self.ebox[*item as usize];
         }
     }
 
     pub fn decryptor_update(&self, ciphertext_in_plaintext_out: &mut [u8]) {
-        let clen = ciphertext_in_plaintext_out.len();
-        for i in 0..clen {
-            let v = ciphertext_in_plaintext_out[i];
-            ciphertext_in_plaintext_out[i] = self.dbox[v as usize];
+        for item in ciphertext_in_plaintext_out {
+            *item = self.dbox[*item as usize];
         }
     }
 }

@@ -10,6 +10,12 @@ impl core::fmt::Debug for DummyCipher {
 
 impl DummyCipher {
     pub fn new() -> Self {
-        Self {}
+        Self
+    }
+}
+
+impl Default for DummyCipher {
+    fn default() -> Self {
+        Self::new()
     }
 }

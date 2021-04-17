@@ -1,0 +1,51 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  buid-test-check:
+    strategy:
+      matrix:
+        platform:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Install Rust nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          components: clippy
+      - name: Build & Test (Default)
+        run: cargo test --verbose --no-fail-fast
+      - name: Build & Test (--no-default-features)
+        run: cargo test --verbose --no-default-features --no-fail-fast
+      - name: Build with All Features Enabled
+        run: cargo build --verbose --all-features
+      - name: Clippy Check
+        uses: actions-rs/clippy-check@v1
+        with:
+          name: clippy-${{ matrix.platform }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: |
+            --verbose --all-features -- -Z macro-backtrace
+            -W clippy::absurd_extreme_comparisons
+            -W clippy::erasing_op
+            -A clippy::collapsible_else_if

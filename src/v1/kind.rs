@@ -62,6 +62,7 @@ pub enum CipherCategory {
 
 /// ShadowSocks cipher type
 #[allow(non_camel_case_types)]
+#[allow(clippy::upper_case_acronyms)]
 #[derive(Clone, Debug, Copy, PartialEq, Eq)]
 pub enum CipherKind {
     NONE,
@@ -256,7 +257,7 @@ impl CipherKind {
             return CipherCategory::Aead;
         }
 
-        return CipherCategory::None;
+        CipherCategory::None
     }
 
     /// Check if the current cipher is `NONE`
@@ -266,6 +267,7 @@ impl CipherKind {
 
     /// Check if the current cipher is a stream cipher
     #[cfg(feature = "v1-stream")]
+    #[allow(clippy::match_like_matches_macro)]
     pub fn is_stream(&self) -> bool {
         use self::CipherKind::*;
 

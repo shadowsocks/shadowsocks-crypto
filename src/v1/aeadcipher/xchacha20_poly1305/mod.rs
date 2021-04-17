@@ -61,6 +61,7 @@ impl XChacha20Poly1305 {
         self.decrypt_slice_detached(nonce, aad, ciphertext_in_plaintext_out, &tag_in)
     }
 
+    #[allow(clippy::absurd_extreme_comparisons)]
     pub fn encrypt_slice_detached(
         &self,
         nonce: &[u8],
@@ -108,6 +109,7 @@ impl XChacha20Poly1305 {
         tag_out.copy_from_slice(&tag[..Self::TAG_LEN]);
     }
 
+    #[allow(clippy::absurd_extreme_comparisons)]
     pub fn decrypt_slice_detached(
         &self,
         nonce: &[u8],

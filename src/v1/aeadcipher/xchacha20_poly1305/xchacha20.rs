@@ -87,7 +87,7 @@ impl XChacha20 {
 
     #[inline]
     pub fn hchacha20(&self, nonce: &[u8]) -> [u32; 8] {
-        let mut initial_state = self.initial_state.clone();
+        let mut initial_state = self.initial_state;
 
         // Nonce (128-bits, little-endian)
         initial_state[12] = u32::from_le_bytes([nonce[0], nonce[1], nonce[2], nonce[3]]);
@@ -116,7 +116,7 @@ impl XChacha20 {
     fn in_place(&self, init_block_counter: u32, nonce: &[u8], plaintext_or_ciphertext: &mut [u8]) {
         debug_assert_eq!(nonce.len(), Self::NONCE_LEN);
 
-        let mut initial_state = self.initial_state.clone();
+        let mut initial_state = self.initial_state;
         let subkey = self.hchacha20(&nonce[..16]);
 
         initial_state[4] = subkey[0];
@@ -136,11 +136,6 @@ impl XChacha20 {
         initial_state[12] = init_block_counter;
 
         // ChaCha20-Nonce (96-bits, little-endian)
-        initial_state[13] = u32::from_le_bytes([nonce[0], nonce[1], nonce[2], nonce[3]]);
-        initial_state[14] = u32::from_le_bytes([nonce[4], nonce[5], nonce[6], nonce[7]]);
-        initial_state[15] = u32::from_le_bytes([nonce[8], nonce[9], nonce[10], nonce[11]]);
-
-        // ChaCha20-Nonce (96-bits, little-endian)
         if cfg!(target_endian = "little") {
             unsafe {
                 let data: &[u32] = std::slice::from_raw_parts(
@@ -157,11 +152,11 @@ impl XChacha20 {
 
         let mut chunks = plaintext_or_ciphertext.chunks_exact_mut(Self::BLOCK_LEN);
         for plaintext in &mut chunks {
-            let mut state = initial_state.clone();
+            let mut state = initial_state;
 
             // 20 rounds (diagonal rounds)
             diagonal_rounds(&mut state);
-            add_si512_inplace(&mut state, &mut initial_state);
+            add_si512_inplace(&mut state, &initial_state);
 
             // Update Block Counter
             initial_state[12] = initial_state[12].wrapping_add(1);
@@ -181,11 +176,11 @@ impl XChacha20 {
 
         if rlen > 0 {
             // Last Block
-            let mut state = initial_state.clone();
+            let mut state = initial_state;
 
             // 20 rounds (diagonal rounds)
             diagonal_rounds(&mut state);
-            add_si512_inplace(&mut state, &mut initial_state);
+            add_si512_inplace(&mut state, &initial_state);
 
             if cfg!(target_endian = "little") {
                 unsafe {

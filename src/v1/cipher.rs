@@ -132,7 +132,7 @@ pub const fn available_ciphers() -> &'static [&'static str] {
 pub fn random_iv_or_salt(iv_or_salt: &mut [u8]) {
     // Gen IV or Gen Salt by KEY-LEN
     if iv_or_salt.is_empty() {
-        return ();
+        return;
     }
 
     let mut rng = rand::thread_rng();
@@ -234,6 +234,7 @@ impl CipherInner for AeadCipher {
 }
 
 /// Unified interface of Ciphers
+#[allow(clippy::large_enum_variant)]
 pub enum Cipher {
     Dummy(DummyCipher),
     #[cfg(feature = "v1-stream")]
