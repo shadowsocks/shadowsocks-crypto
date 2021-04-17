@@ -14,8 +14,6 @@ documentation = "https://docs.rs/shadowsocks-crypto"
 [dependencies]
 rand = "0.8"
 crypto2 = "0.1.2"
-libsodium-sys = { version = "0.2", optional = true }
-libc = { version = "0.2", optional = true }
 
 
 [target.'cfg(any(target_arch = "x86", target_arch = "x86_64"))'.dependencies]
@@ -42,4 +40,4 @@ nightly = []
 v1 = []
 v1-stream = ["v1"]
 v1-aead = ["v1"]
-v1-aead-extra = ["v1-aead", "libsodium-sys", "libc"]
+v1-aead-extra = ["v1-aead"]

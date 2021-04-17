@@ -25,13 +25,10 @@ pub use crypto2::aeadcipher::{Aes128Gcm, Aes256Gcm, Chacha20Poly1305};
 pub use crate::v1::ring::{Aes128Gcm, Aes256Gcm, Chacha20Poly1305};
 use crate::v1::CipherKind;
 
-
+#[cfg(feature = "v1-aead-extra")]
 pub mod xchacha20_poly1305;
-
 #[cfg(feature = "v1-aead-extra")]
-mod sodium;
-#[cfg(feature = "v1-aead-extra")]
-pub use self::sodium::XChacha20Poly1305;
+pub use self::xchacha20_poly1305::XChacha20Poly1305;
 
 trait AeadCipherExt {
     fn ac_kind(&self) -> CipherKind;

@@ -1,6 +1,5 @@
 // use crate::util::xor_si128_inplace;
 
-
 #[inline]
 fn add_si512_inplace(a: &mut [u32; XChacha20::STATE_LEN], b: &[u32; XChacha20::STATE_LEN]) {
     for i in 0..XChacha20::STATE_LEN {
@@ -12,7 +11,7 @@ fn add_si512_inplace(a: &mut [u32; XChacha20::STATE_LEN], b: &[u32; XChacha20::S
 fn xor_si512_inplace(a: &mut [u8], b: &[u32; XChacha20::STATE_LEN]) {
     // NOTE: 看起来编译器会对这种单独的函数做优化，我们不再需要手动写 AVX2/AVX512 的代码咯。
     use core::slice;
-    
+
     unsafe {
         let d1 = slice::from_raw_parts_mut(a.as_mut_ptr() as *mut u32, XChacha20::STATE_LEN);
         for i in 0..XChacha20::STATE_LEN {
@@ -41,26 +40,26 @@ impl core::fmt::Debug for XChacha20 {
 }
 
 impl XChacha20 {
-    pub const KEY_LEN: usize     = 32;
-    pub const BLOCK_LEN: usize   = 64;
-    pub const NONCE_LEN: usize   = 24;
+    pub const KEY_LEN: usize = 32;
+    pub const BLOCK_LEN: usize = 64;
+    pub const NONCE_LEN: usize = 24;
 
     const CHACHA20_NONCE_LEN: usize = 12;
     const STATE_LEN: usize = 16; // len in doubleword (32-bits)
 
     // NOTE: 16 bytes 长度的 Key 并没有被标准采纳。
-    // 
+    //
     // sigma constant b"expand 16-byte k" in little-endian encoding
     // const K16: [u32; 4] = [0x61707865, 0x3120646e, 0x79622d36, 0x6b206574];
 
     // sigma constant b"expand 32-byte k" in little-endian encoding
     const K32: [u32; 4] = [0x61707865, 0x3320646e, 0x79622d32, 0x6b206574];
-    
+
     // cccccccc  cccccccc  cccccccc  cccccccc
     // kkkkkkkk  kkkkkkkk  kkkkkkkk  kkkkkkkk
     // kkkkkkkk  kkkkkkkk  kkkkkkkk  kkkkkkkk
     // nnnnnnnn  nnnnnnnn  nnnnnnnn  nnnnnnnn
-    // 
+    //
     // HChaCha20 State: c=constant k=key n=nonce
     pub fn new(key: &[u8]) -> Self {
         assert_eq!(key.len(), Self::KEY_LEN);
@@ -74,36 +73,36 @@ impl XChacha20 {
         initial_state[3] = Self::K32[3];
 
         // A 256-bit key (32 Bytes)
-        initial_state[ 4] = u32::from_le_bytes([key[ 0], key[ 1], key[ 2], key[ 3]]);
-        initial_state[ 5] = u32::from_le_bytes([key[ 4], key[ 5], key[ 6], key[ 7]]);
-        initial_state[ 6] = u32::from_le_bytes([key[ 8], key[ 9], key[10], key[11]]);
-        initial_state[ 7] = u32::from_le_bytes([key[12], key[13], key[14], key[15]]);
-        initial_state[ 8] = u32::from_le_bytes([key[16], key[17], key[18], key[19]]);
-        initial_state[ 9] = u32::from_le_bytes([key[20], key[21], key[22], key[23]]);
+        initial_state[4] = u32::from_le_bytes([key[0], key[1], key[2], key[3]]);
+        initial_state[5] = u32::from_le_bytes([key[4], key[5], key[6], key[7]]);
+        initial_state[6] = u32::from_le_bytes([key[8], key[9], key[10], key[11]]);
+        initial_state[7] = u32::from_le_bytes([key[12], key[13], key[14], key[15]]);
+        initial_state[8] = u32::from_le_bytes([key[16], key[17], key[18], key[19]]);
+        initial_state[9] = u32::from_le_bytes([key[20], key[21], key[22], key[23]]);
         initial_state[10] = u32::from_le_bytes([key[24], key[25], key[26], key[27]]);
         initial_state[11] = u32::from_le_bytes([key[28], key[29], key[30], key[31]]);
 
         Self { initial_state }
     }
-    
+
     #[inline]
     pub fn hchacha20(&self, nonce: &[u8]) -> [u32; 8] {
         let mut initial_state = self.initial_state.clone();
 
         // Nonce (128-bits, little-endian)
-        initial_state[12] = u32::from_le_bytes([nonce[ 0], nonce[ 1], nonce[ 2], nonce[ 3]]);
-        initial_state[13] = u32::from_le_bytes([nonce[ 4], nonce[ 5], nonce[ 6], nonce[ 7]]);
-        initial_state[14] = u32::from_le_bytes([nonce[ 8], nonce[ 9], nonce[10], nonce[11]]);
+        initial_state[12] = u32::from_le_bytes([nonce[0], nonce[1], nonce[2], nonce[3]]);
+        initial_state[13] = u32::from_le_bytes([nonce[4], nonce[5], nonce[6], nonce[7]]);
+        initial_state[14] = u32::from_le_bytes([nonce[8], nonce[9], nonce[10], nonce[11]]);
         initial_state[15] = u32::from_le_bytes([nonce[12], nonce[13], nonce[14], nonce[15]]);
 
         // 20 rounds (diagonal rounds)
         diagonal_rounds(&mut initial_state);
 
         let mut subkey = [0u32; Self::KEY_LEN / 4];
-        subkey[0] = initial_state[ 0];
-        subkey[1] = initial_state[ 1];
-        subkey[2] = initial_state[ 2];
-        subkey[3] = initial_state[ 3];
+        subkey[0] = initial_state[0];
+        subkey[1] = initial_state[1];
+        subkey[2] = initial_state[2];
+        subkey[3] = initial_state[3];
 
         subkey[4] = initial_state[12];
         subkey[5] = initial_state[13];
@@ -120,12 +119,12 @@ impl XChacha20 {
         let mut initial_state = self.initial_state.clone();
         let subkey = self.hchacha20(&nonce[..16]);
 
-        initial_state[ 4] = subkey[0];
-        initial_state[ 5] = subkey[1];
-        initial_state[ 6] = subkey[2];
-        initial_state[ 7] = subkey[3];
-        initial_state[ 8] = subkey[4];
-        initial_state[ 9] = subkey[5];
+        initial_state[4] = subkey[0];
+        initial_state[5] = subkey[1];
+        initial_state[6] = subkey[2];
+        initial_state[7] = subkey[3];
+        initial_state[8] = subkey[4];
+        initial_state[9] = subkey[5];
         initial_state[10] = subkey[6];
         initial_state[11] = subkey[7];
 
@@ -137,22 +136,25 @@ impl XChacha20 {
         initial_state[12] = init_block_counter;
 
         // ChaCha20-Nonce (96-bits, little-endian)
-        initial_state[13] = u32::from_le_bytes([nonce[ 0], nonce[ 1], nonce[ 2], nonce[ 3]]);
-        initial_state[14] = u32::from_le_bytes([nonce[ 4], nonce[ 5], nonce[ 6], nonce[ 7]]);
-        initial_state[15] = u32::from_le_bytes([nonce[ 8], nonce[ 9], nonce[10], nonce[11]]);
+        initial_state[13] = u32::from_le_bytes([nonce[0], nonce[1], nonce[2], nonce[3]]);
+        initial_state[14] = u32::from_le_bytes([nonce[4], nonce[5], nonce[6], nonce[7]]);
+        initial_state[15] = u32::from_le_bytes([nonce[8], nonce[9], nonce[10], nonce[11]]);
 
         // ChaCha20-Nonce (96-bits, little-endian)
         if cfg!(target_endian = "little") {
             unsafe {
-                let data: &[u32] = std::slice::from_raw_parts(nonce.as_ptr() as *const u32, nonce.len() / core::mem::size_of::<u32>());
+                let data: &[u32] = std::slice::from_raw_parts(
+                    nonce.as_ptr() as *const u32,
+                    nonce.len() / core::mem::size_of::<u32>(),
+                );
                 initial_state[13..16].copy_from_slice(data);
             }
         } else {
-            initial_state[13] = u32::from_le_bytes([nonce[ 0], nonce[ 1], nonce[ 2], nonce[ 3]]);
-            initial_state[14] = u32::from_le_bytes([nonce[ 4], nonce[ 5], nonce[ 6], nonce[ 7]]);
-            initial_state[15] = u32::from_le_bytes([nonce[ 8], nonce[ 9], nonce[10], nonce[11]]);
+            initial_state[13] = u32::from_le_bytes([nonce[0], nonce[1], nonce[2], nonce[3]]);
+            initial_state[14] = u32::from_le_bytes([nonce[4], nonce[5], nonce[6], nonce[7]]);
+            initial_state[15] = u32::from_le_bytes([nonce[8], nonce[9], nonce[10], nonce[11]]);
         }
-        
+
         let mut chunks = plaintext_or_ciphertext.chunks_exact_mut(Self::BLOCK_LEN);
         for plaintext in &mut chunks {
             let mut state = initial_state.clone();
@@ -188,8 +190,9 @@ impl XChacha20 {
             if cfg!(target_endian = "little") {
                 unsafe {
                     use core::slice;
-                    
-                    let keystream = slice::from_raw_parts(state.as_ptr() as *const u8, Self::BLOCK_LEN);
+
+                    let keystream =
+                        slice::from_raw_parts(state.as_ptr() as *const u8, Self::BLOCK_LEN);
                     for i in 0..rlen {
                         rem[i] ^= keystream[i];
                     }
@@ -207,13 +210,23 @@ impl XChacha20 {
 
     /// Nonce (128-bits, little-endian)
     #[inline]
-    pub fn encrypt_slice(&self, init_block_counter: u32, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
+    pub fn encrypt_slice(
+        &self,
+        init_block_counter: u32,
+        nonce: &[u8],
+        plaintext_in_ciphertext_out: &mut [u8],
+    ) {
         self.in_place(init_block_counter, nonce, plaintext_in_ciphertext_out)
     }
 
     /// Nonce (128-bits, little-endian)
     #[inline]
-    pub fn decrypt_slice(&self, init_block_counter: u32, nonce: &[u8], ciphertext_in_plaintext_out: &mut [u8]) {
+    pub fn decrypt_slice(
+        &self,
+        init_block_counter: u32,
+        nonce: &[u8],
+        ciphertext_in_plaintext_out: &mut [u8],
+    ) {
         self.in_place(init_block_counter, nonce, ciphertext_in_plaintext_out)
     }
 }
@@ -234,10 +247,18 @@ fn quarter_round(state: &mut [u32], ai: usize, bi: usize, ci: usize, di: usize) 
     let mut c = state[ci];
     let mut d = state[di];
 
-    a = a.wrapping_add(b); d ^= a; d = d.rotate_left(16);
-    c = c.wrapping_add(d); b ^= c; b = b.rotate_left(12);
-    a = a.wrapping_add(b); d ^= a; d = d.rotate_left(8);
-    c = c.wrapping_add(d); b ^= c; b = b.rotate_left(7);
+    a = a.wrapping_add(b);
+    d ^= a;
+    d = d.rotate_left(16);
+    c = c.wrapping_add(d);
+    b ^= c;
+    b = b.rotate_left(12);
+    a = a.wrapping_add(b);
+    d ^= a;
+    d = d.rotate_left(8);
+    c = c.wrapping_add(d);
+    b ^= c;
+    b = b.rotate_left(7);
 
     state[ai] = a;
     state[bi] = b;
@@ -249,22 +270,25 @@ fn quarter_round(state: &mut [u32], ai: usize, bi: usize, ci: usize, di: usize) 
 fn diagonal_rounds(state: &mut [u32; XChacha20::STATE_LEN]) {
     for _ in 0..10 {
         // column rounds
-        quarter_round(state, 0, 4,  8, 12);
-        quarter_round(state, 1, 5,  9, 13);
+        quarter_round(state, 0, 4, 8, 12);
+        quarter_round(state, 1, 5, 9, 13);
         quarter_round(state, 2, 6, 10, 14);
         quarter_round(state, 3, 7, 11, 15);
         quarter_round(state, 0, 5, 10, 15);
         quarter_round(state, 1, 6, 11, 12);
-        quarter_round(state, 2, 7,  8, 13);
-        quarter_round(state, 3, 4,  9, 14);
+        quarter_round(state, 2, 7, 8, 13);
+        quarter_round(state, 3, 4, 9, 14);
     }
 }
 
 #[inline]
-fn state_to_keystream(state: &[u32; XChacha20::STATE_LEN], keystream: &mut [u8; XChacha20::BLOCK_LEN]) {
-    keystream[ 0.. 4].copy_from_slice(&state[0].to_le_bytes());
-    keystream[ 4.. 8].copy_from_slice(&state[1].to_le_bytes());
-    keystream[ 8..12].copy_from_slice(&state[2].to_le_bytes());
+fn state_to_keystream(
+    state: &[u32; XChacha20::STATE_LEN],
+    keystream: &mut [u8; XChacha20::BLOCK_LEN],
+) {
+    keystream[0..4].copy_from_slice(&state[0].to_le_bytes());
+    keystream[4..8].copy_from_slice(&state[1].to_le_bytes());
+    keystream[8..12].copy_from_slice(&state[2].to_le_bytes());
     keystream[12..16].copy_from_slice(&state[3].to_le_bytes());
     keystream[16..20].copy_from_slice(&state[4].to_le_bytes());
     keystream[20..24].copy_from_slice(&state[5].to_le_bytes());
@@ -280,20 +304,18 @@ fn state_to_keystream(state: &[u32; XChacha20::STATE_LEN], keystream: &mut [u8; 
     keystream[60..64].copy_from_slice(&state[15].to_le_bytes());
 }
 
-
 #[test]
 fn test_xchacha20() {
     // Test Vector for the HChaCha20 Block Function
     // https://github.com/bikeshedders/xchacha-rfc/blob/master/xchacha.md#test-vector-for-the-hchacha20-block-function
     let key = [
-        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 
-        0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 
-        0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 
-        0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,
+        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e,
+        0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d,
+        0x1e, 0x1f,
     ];
     let nonce = [
-        0x00, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00, 0x4a, 
-        0x00, 0x00, 0x00, 0x00, 0x31, 0x41, 0x59, 0x27, 
+        0x00, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00, 0x4a, 0x00, 0x00, 0x00, 0x00, 0x31, 0x41, 0x59,
+        0x27,
     ];
 
     let xchacha20 = XChacha20::new(&key);
@@ -302,8 +324,11 @@ fn test_xchacha20() {
         *n = n.to_be();
     }
 
-    assert_eq!(&subkey, &[
-        0x82413b42, 0x27b27bfe, 0xd30e4250, 0x8a877d73,
-        0xa0f9e4d5, 0x8a74a853, 0xc12ec413, 0x26d3ecdc,
-    ]);
+    assert_eq!(
+        &subkey,
+        &[
+            0x82413b42, 0x27b27bfe, 0xd30e4250, 0x8a877d73, 0xa0f9e4d5, 0x8a74a853, 0xc12ec413,
+            0x26d3ecdc,
+        ]
+    );
 }

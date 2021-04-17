@@ -748,6 +748,9 @@ impl core::str::FromStr for CipherKind {
             #[cfg(feature = "v1-aead-extra")]
             "aes-siv-cmac-512" => Ok(AES_SIV_CMAC_512),
 
+            #[cfg(feature = "v1-aead-extra")]
+            "xchacha20-ietf-poly1305" => Ok(XCHACHA20_POLY1305),
+
             _ => Err(ParseCipherKindError),
         }
     }
