@@ -1,5 +1,7 @@
 # shadowsocks-crypto
 
+[![Build & Test](https://github.com/shadowsocks/shadowsocks-crypto/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/shadowsocks/shadowsocks-crypto/actions/workflows/build-and-test.yml)
+
 shadowsocks' flavored cryptographic algorithm in pure Rust.
 
 ## Supported Ciphers

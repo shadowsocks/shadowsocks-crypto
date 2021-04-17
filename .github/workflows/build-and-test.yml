@@ -2,9 +2,9 @@ name: Build & Test
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
-    branches: [master]
+    branches: [main]
 
 env:
   CARGO_TERM_COLOR: always
@@ -31,8 +31,10 @@ jobs:
       - name: Install Rust nightly
         uses: actions-rs/toolchain@v1
         with:
+          toolchain: nightly
           profile: minimal
           components: clippy
+          override: true
       - name: Build & Test (Default)
         run: cargo test --verbose --no-fail-fast
       - name: Build & Test (--no-default-features)
