@@ -2,9 +2,7 @@
 
 #[cfg(feature = "v1-aead-extra")]
 use super::aeadcipher::{
-    Aes128Ccm, Aes128GcmSiv, Aes128OcbTag128, Aes192OcbTag128, Aes256Ccm, Aes256GcmSiv,
-    Aes256OcbTag128, AesSivCmac256, AesSivCmac384, AesSivCmac512, Sm4Ccm, Sm4Gcm,
-    XChacha20Poly1305,
+    Aes128Ccm, Aes128GcmSiv, Aes256Ccm, Aes256GcmSiv, Sm4Ccm, Sm4Gcm, XChacha20Poly1305,
 };
 #[cfg(feature = "v1-aead")]
 use super::aeadcipher::{Aes128Gcm, Aes256Gcm, Chacha20Poly1305};
@@ -206,32 +204,6 @@ pub enum CipherKind {
 
     #[cfg(feature = "v1-aead-extra")]
     #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
-    /// AEAD_AES_128_OCB_TAGLEN128
-    AES_128_OCB_TAGLEN128,
-    #[cfg(feature = "v1-aead-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
-    /// AEAD_AES_192_OCB_TAGLEN128
-    AES_192_OCB_TAGLEN128,
-    #[cfg(feature = "v1-aead-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
-    /// AEAD_AES_256_OCB_TAGLEN128
-    AES_256_OCB_TAGLEN128,
-
-    #[cfg(feature = "v1-aead-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
-    /// AEAD_AES_SIV_CMAC_256
-    AES_SIV_CMAC_256,
-    #[cfg(feature = "v1-aead-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
-    /// AEAD_AES_SIV_CMAC_384
-    AES_SIV_CMAC_384,
-    #[cfg(feature = "v1-aead-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
-    /// AEAD_AES_SIV_CMAC_512
-    AES_SIV_CMAC_512,
-
-    #[cfg(feature = "v1-aead-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
     /// AEAD_AES_128_GCM_SIV
     AES_128_GCM_SIV,
     #[cfg(feature = "v1-aead-extra")]
@@ -303,19 +275,8 @@ impl CipherKind {
             AES_128_GCM | AES_256_GCM | CHACHA20_POLY1305 => true,
 
             #[cfg(feature = "v1-aead-extra")]
-            AES_128_CCM
-            | AES_256_CCM
-            | AES_128_OCB_TAGLEN128
-            | AES_192_OCB_TAGLEN128
-            | AES_256_OCB_TAGLEN128
-            | AES_SIV_CMAC_256
-            | AES_SIV_CMAC_384
-            | AES_SIV_CMAC_512
-            | AES_128_GCM_SIV
-            | AES_256_GCM_SIV
-            | XCHACHA20_POLY1305
-            | SM4_GCM
-            | SM4_CCM => true,
+            AES_128_CCM | AES_256_CCM | AES_128_GCM_SIV | AES_256_GCM_SIV | XCHACHA20_POLY1305
+            | SM4_GCM | SM4_CCM => true,
 
             _ => false,
         }
@@ -422,21 +383,6 @@ impl CipherKind {
             AES_256_CCM => Aes256Ccm::KEY_LEN,
 
             #[cfg(feature = "v1-aead-extra")]
-            AES_128_OCB_TAGLEN128 => Aes128OcbTag128::KEY_LEN,
-            #[cfg(feature = "v1-aead-extra")]
-            AES_192_OCB_TAGLEN128 => Aes192OcbTag128::KEY_LEN,
-            #[cfg(feature = "v1-aead-extra")]
-            AES_256_OCB_TAGLEN128 => Aes256OcbTag128::KEY_LEN,
-            // NOTE: 注意 AES_SIV_CMAC_256 的 KEY 是 两个 AES-128 的 Key.
-            //       所以是 256.
-            #[cfg(feature = "v1-aead-extra")]
-            AES_SIV_CMAC_256 => AesSivCmac256::KEY_LEN,
-            #[cfg(feature = "v1-aead-extra")]
-            AES_SIV_CMAC_384 => AesSivCmac384::KEY_LEN,
-            #[cfg(feature = "v1-aead-extra")]
-            AES_SIV_CMAC_512 => AesSivCmac512::KEY_LEN,
-
-            #[cfg(feature = "v1-aead-extra")]
             AES_128_GCM_SIV => Aes128GcmSiv::KEY_LEN,
             #[cfg(feature = "v1-aead-extra")]
             AES_256_GCM_SIV => Aes256GcmSiv::KEY_LEN,
@@ -519,20 +465,6 @@ impl CipherKind {
             AES_128_CCM => Aes128Ccm::TAG_LEN,
             #[cfg(feature = "v1-aead-extra")]
             AES_256_CCM => Aes256Ccm::TAG_LEN,
-
-            #[cfg(feature = "v1-aead-extra")]
-            AES_128_OCB_TAGLEN128 => Aes128OcbTag128::TAG_LEN,
-            #[cfg(feature = "v1-aead-extra")]
-            AES_192_OCB_TAGLEN128 => Aes192OcbTag128::TAG_LEN,
-            #[cfg(feature = "v1-aead-extra")]
-            AES_256_OCB_TAGLEN128 => Aes256OcbTag128::TAG_LEN,
-
-            #[cfg(feature = "v1-aead-extra")]
-            AES_SIV_CMAC_256 => AesSivCmac256::TAG_LEN,
-            #[cfg(feature = "v1-aead-extra")]
-            AES_SIV_CMAC_384 => AesSivCmac384::TAG_LEN,
-            #[cfg(feature = "v1-aead-extra")]
-            AES_SIV_CMAC_512 => AesSivCmac512::TAG_LEN,
 
             #[cfg(feature = "v1-aead-extra")]
             AES_128_GCM_SIV => Aes128GcmSiv::TAG_LEN,
@@ -664,20 +596,6 @@ impl core::fmt::Display for CipherKind {
             CipherKind::AES_128_GCM_SIV => "aes-128-gcm-siv",
             #[cfg(feature = "v1-aead-extra")]
             CipherKind::AES_256_GCM_SIV => "aes-256-gcm-siv",
-
-            #[cfg(feature = "v1-aead-extra")]
-            CipherKind::AES_128_OCB_TAGLEN128 => "aes-128-ocb-taglen128",
-            #[cfg(feature = "v1-aead-extra")]
-            CipherKind::AES_192_OCB_TAGLEN128 => "aes-192-ocb-taglen128",
-            #[cfg(feature = "v1-aead-extra")]
-            CipherKind::AES_256_OCB_TAGLEN128 => "aes-256-ocb-taglen128",
-
-            #[cfg(feature = "v1-aead-extra")]
-            CipherKind::AES_SIV_CMAC_256 => "aes-siv-cmac-256",
-            #[cfg(feature = "v1-aead-extra")]
-            CipherKind::AES_SIV_CMAC_384 => "aes-siv-cmac-384",
-            #[cfg(feature = "v1-aead-extra")]
-            CipherKind::AES_SIV_CMAC_512 => "aes-siv-cmac-512",
 
             #[cfg(feature = "v1-aead-extra")]
             CipherKind::XCHACHA20_POLY1305 => "xchacha20-ietf-poly1305",
@@ -812,20 +730,6 @@ impl core::str::FromStr for CipherKind {
             "aes-128-gcm-siv" => Ok(AES_128_GCM_SIV),
             #[cfg(feature = "v1-aead-extra")]
             "aes-256-gcm-siv" => Ok(AES_256_GCM_SIV),
-
-            #[cfg(feature = "v1-aead-extra")]
-            "aes-128-ocb-taglen128" => Ok(AES_128_OCB_TAGLEN128),
-            #[cfg(feature = "v1-aead-extra")]
-            "aes-192-ocb-taglen128" => Ok(AES_192_OCB_TAGLEN128),
-            #[cfg(feature = "v1-aead-extra")]
-            "aes-256-ocb-taglen128" => Ok(AES_256_OCB_TAGLEN128),
-
-            #[cfg(feature = "v1-aead-extra")]
-            "aes-siv-cmac-256" => Ok(AES_SIV_CMAC_256),
-            #[cfg(feature = "v1-aead-extra")]
-            "aes-siv-cmac-384" => Ok(AES_SIV_CMAC_384),
-            #[cfg(feature = "v1-aead-extra")]
-            "aes-siv-cmac-512" => Ok(AES_SIV_CMAC_512),
 
             #[cfg(feature = "v1-aead-extra")]
             "xchacha20-ietf-poly1305" => Ok(XCHACHA20_POLY1305),

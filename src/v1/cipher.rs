@@ -112,18 +112,6 @@ pub const fn available_ciphers() -> &'static [&'static str] {
         #[cfg(feature = "v1-aead-extra")]
         "aes-256-gcm-siv",
         #[cfg(feature = "v1-aead-extra")]
-        "aes-128-ocb-taglen128",
-        #[cfg(feature = "v1-aead-extra")]
-        "aes-192-ocb-taglen128",
-        #[cfg(feature = "v1-aead-extra")]
-        "aes-256-ocb-taglen128",
-        #[cfg(feature = "v1-aead-extra")]
-        "aes-siv-cmac-256",
-        #[cfg(feature = "v1-aead-extra")]
-        "aes-siv-cmac-384",
-        #[cfg(feature = "v1-aead-extra")]
-        "aes-siv-cmac-512",
-        #[cfg(feature = "v1-aead-extra")]
         "xchacha20-ietf-poly1305",
         #[cfg(feature = "v1-aead-extra")]
         "sm4-gcm",
