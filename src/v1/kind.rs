@@ -612,6 +612,12 @@ impl core::fmt::Display for CipherKind {
 #[derive(Debug, Clone)]
 pub struct ParseCipherKindError;
 
+impl core::fmt::Display for ParseCipherKindError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.write_str("invalid CipherKind")
+    }
+}
+
 impl core::str::FromStr for CipherKind {
     type Err = ParseCipherKindError;
 
