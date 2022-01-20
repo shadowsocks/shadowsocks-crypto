@@ -1,6 +1,6 @@
 [package]
 name = "shadowsocks-crypto"
-version = "0.2.5"
+version = "0.3.0"
 authors = ["luozijun <luozijun.assistant@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -13,7 +13,7 @@ documentation = "https://docs.rs/shadowsocks-crypto"
 
 [dependencies]
 rand = "0.8"
-crypto2 = "0.1.2"
+crypto2 = { version = "0.2", git = "https://github.com/shadowsocks/crypto2.git" }
 
 
 [target.'cfg(any(target_arch = "x86", target_arch = "x86_64"))'.dependencies]
