@@ -17,8 +17,8 @@ default = [
 ]
 v1 = []
 v1-stream = ["v1", "chacha20", "aes"]
-v1-aead = ["v1", "aes-gcm", "chacha20poly1305", "aes-gcm-siv", "hkdf", "sha1"]
-v1-aead-extra = ["v1-aead"]
+v1-aead = ["v1", "aes-gcm", "chacha20poly1305", "hkdf", "sha1"]
+v1-aead-extra = ["v1-aead", "aes-gcm-siv"]
 ring = ["ring-compat"]
 
 [dependencies]
