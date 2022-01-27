@@ -17,7 +17,7 @@ default = [
 ]
 v1 = []
 v1-stream = ["v1", "chacha20", "aes"]
-v1-aead = ["v1", "aes-gcm", "chacha20poly1305", "hkdf", "sha1"]
+v1-aead = ["v1", "aes-gcm", "chacha20poly1305", "aes-gcm-siv", "hkdf", "sha1"]
 v1-aead-extra = ["v1-aead"]
 ring = ["ring-compat"]
 
@@ -25,6 +25,7 @@ ring = ["ring-compat"]
 cfg-if = "1.0"
 rand = "0.8"
 aes-gcm = { version = "0.9", optional = true }
+aes-gcm-siv = { version = "0.10.3", optional = true }
 chacha20poly1305 = { version = "0.9", optional = true }
 ring-compat = { version = "0.4", optional = true }
 md-5 = "0.10"

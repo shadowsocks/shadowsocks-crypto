@@ -1,15 +1,20 @@
 use crate::v1::CipherKind;
 
 mod aes_gcm;
+#[cfg(feature = "v1-aead-extra")]
+mod aes_gcm_siv;
 mod chacha20_poly1305;
 #[cfg(feature = "v1-aead-extra")]
 mod xchacha20_poly1305;
 
-#[cfg(feature = "v1-aead-extra")]
-pub use self::xchacha20_poly1305::XChaCha20Poly1305;
 pub use self::{
     aes_gcm::{Aes128Gcm, Aes256Gcm},
     chacha20_poly1305::ChaCha20Poly1305,
+};
+#[cfg(feature = "v1-aead-extra")]
+pub use self::{
+    aes_gcm_siv::{Aes128GcmSiv, Aes256GcmSiv},
+    xchacha20_poly1305::XChaCha20Poly1305,
 };
 
 enum AeadCipherVariant {
@@ -18,6 +23,10 @@ enum AeadCipherVariant {
     ChaCha20Poly1305(ChaCha20Poly1305),
     #[cfg(feature = "v1-aead-extra")]
     XChaCha20Poly1305(XChaCha20Poly1305),
+    #[cfg(feature = "v1-aead-extra")]
+    Aes128GcmSiv(Aes128GcmSiv),
+    #[cfg(feature = "v1-aead-extra")]
+    Aes256GcmSiv(Aes256GcmSiv),
 }
 
 impl AeadCipherVariant {
@@ -28,6 +37,10 @@ impl AeadCipherVariant {
             CipherKind::CHACHA20_POLY1305 => AeadCipherVariant::ChaCha20Poly1305(ChaCha20Poly1305::new(key)),
             #[cfg(feature = "v1-aead-extra")]
             CipherKind::XCHACHA20_POLY1305 => AeadCipherVariant::XChaCha20Poly1305(XChaCha20Poly1305::new(key)),
+            #[cfg(feature = "v1-aead-extra")]
+            CipherKind::AES_128_GCM_SIV => AeadCipherVariant::Aes128GcmSiv(Aes128GcmSiv::new(key)),
+            #[cfg(feature = "v1-aead-extra")]
+            CipherKind::AES_256_GCM_SIV => AeadCipherVariant::Aes256GcmSiv(Aes256GcmSiv::new(key)),
             _ => unreachable!("{:?} is not an AEAD cipher", kind),
         }
     }
@@ -39,6 +52,10 @@ impl AeadCipherVariant {
             AeadCipherVariant::ChaCha20Poly1305(..) => ChaCha20Poly1305::nonce_size(),
             #[cfg(feature = "v1-aead-extra")]
             AeadCipherVariant::XChaCha20Poly1305(..) => XChaCha20Poly1305::nonce_size(),
+            #[cfg(feature = "v1-aead-extra")]
+            AeadCipherVariant::Aes128GcmSiv(..) => Aes128GcmSiv::nonce_size(),
+            #[cfg(feature = "v1-aead-extra")]
+            AeadCipherVariant::Aes256GcmSiv(..) => Aes256GcmSiv::nonce_size(),
         }
     }
 
@@ -49,6 +66,10 @@ impl AeadCipherVariant {
             AeadCipherVariant::ChaCha20Poly1305(..) => CipherKind::CHACHA20_POLY1305,
             #[cfg(feature = "v1-aead-extra")]
             AeadCipherVariant::XChaCha20Poly1305(..) => CipherKind::XCHACHA20_POLY1305,
+            #[cfg(feature = "v1-aead-extra")]
+            AeadCipherVariant::Aes128GcmSiv(..) => CipherKind::AES_128_GCM_SIV,
+            #[cfg(feature = "v1-aead-extra")]
+            AeadCipherVariant::Aes256GcmSiv(..) => CipherKind::AES_256_GCM_SIV,
         }
     }
 
@@ -59,6 +80,10 @@ impl AeadCipherVariant {
             AeadCipherVariant::ChaCha20Poly1305(ref mut c) => c.encrypt(nonce, plaintext_in_ciphertext_out),
             #[cfg(feature = "v1-aead-extra")]
             AeadCipherVariant::XChaCha20Poly1305(ref mut c) => c.encrypt(nonce, plaintext_in_ciphertext_out),
+            #[cfg(feature = "v1-aead-extra")]
+            AeadCipherVariant::Aes128GcmSiv(ref mut c) => c.encrypt(nonce, plaintext_in_ciphertext_out),
+            #[cfg(feature = "v1-aead-extra")]
+            AeadCipherVariant::Aes256GcmSiv(ref mut c) => c.encrypt(nonce, plaintext_in_ciphertext_out),
         }
     }
 
@@ -69,6 +94,10 @@ impl AeadCipherVariant {
             AeadCipherVariant::ChaCha20Poly1305(ref mut c) => c.decrypt(nonce, ciphertext_in_plaintext_out),
             #[cfg(feature = "v1-aead-extra")]
             AeadCipherVariant::XChaCha20Poly1305(ref mut c) => c.decrypt(nonce, ciphertext_in_plaintext_out),
+            #[cfg(feature = "v1-aead-extra")]
+            AeadCipherVariant::Aes128GcmSiv(ref mut c) => c.decrypt(nonce, ciphertext_in_plaintext_out),
+            #[cfg(feature = "v1-aead-extra")]
+            AeadCipherVariant::Aes256GcmSiv(ref mut c) => c.decrypt(nonce, ciphertext_in_plaintext_out),
         }
     }
 }

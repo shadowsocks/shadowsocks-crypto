@@ -1,9 +1,9 @@
 //! Cipher Kind
 
-#[cfg(feature = "v1-aead-extra")]
-use super::aeadcipher::XChaCha20Poly1305;
 #[cfg(feature = "v1-aead")]
 use super::aeadcipher::{Aes128Gcm, Aes256Gcm, ChaCha20Poly1305};
+#[cfg(feature = "v1-aead-extra")]
+use super::aeadcipher::{Aes128GcmSiv, Aes256GcmSiv, XChaCha20Poly1305};
 
 #[cfg(feature = "v1-stream")]
 use super::streamcipher::{
@@ -188,6 +188,15 @@ pub enum CipherKind {
     /// AEAD_AES_256_GCM
     AES_256_GCM,
 
+    #[cfg(feature = "v1-aead-extra")]
+    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
+    /// AEAD_AES_128_GCM_SIV
+    AES_128_GCM_SIV,
+    #[cfg(feature = "v1-aead-extra")]
+    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
+    /// AEAD_AES_256_GCM_SIV
+    AES_256_GCM_SIV,
+
     // NOTE: IETF 版本
     #[cfg(feature = "v1-aead")]
     #[cfg_attr(docrs, doc(cfg(feature = "v1-aead")))]
@@ -247,7 +256,7 @@ impl CipherKind {
             AES_128_GCM | AES_256_GCM | CHACHA20_POLY1305 => true,
 
             #[cfg(feature = "v1-aead-extra")]
-            XCHACHA20_POLY1305 => true,
+            AES_128_GCM_SIV | AES_256_GCM_SIV | XCHACHA20_POLY1305 => true,
 
             _ => false,
         }
@@ -343,6 +352,11 @@ impl CipherKind {
             #[cfg(feature = "v1-aead")]
             AES_256_GCM => Aes256Gcm::key_size(),
 
+            #[cfg(feature = "v1-aead-extra")]
+            AES_128_GCM_SIV => Aes128GcmSiv::key_size(),
+            #[cfg(feature = "v1-aead-extra")]
+            AES_256_GCM_SIV => Aes256GcmSiv::key_size(),
+
             #[cfg(feature = "v1-aead")]
             CHACHA20_POLY1305 => ChaCha20Poly1305::key_size(),
 
@@ -413,6 +427,11 @@ impl CipherKind {
         match *self {
             AES_128_GCM => Aes128Gcm::tag_size(),
             AES_256_GCM => Aes256Gcm::tag_size(),
+
+            #[cfg(feature = "v1-aead-extra")]
+            AES_128_GCM_SIV => Aes128GcmSiv::tag_size(),
+            #[cfg(feature = "v1-aead-extra")]
+            AES_256_GCM_SIV => Aes256GcmSiv::tag_size(),
 
             CHACHA20_POLY1305 => ChaCha20Poly1305::tag_size(),
 
@@ -523,6 +542,11 @@ impl core::fmt::Display for CipherKind {
             CipherKind::AES_128_GCM => "aes-128-gcm",
             #[cfg(feature = "v1-aead")]
             CipherKind::AES_256_GCM => "aes-256-gcm",
+
+            #[cfg(feature = "v1-aead-extra")]
+            CipherKind::AES_128_GCM_SIV => "aes-128-gcm-siv",
+            #[cfg(feature = "v1-aead-extra")]
+            CipherKind::AES_256_GCM_SIV => "aes-256-gcm-siv",
 
             #[cfg(feature = "v1-aead")]
             CipherKind::CHACHA20_POLY1305 => "chacha20-ietf-poly1305",
@@ -649,6 +673,12 @@ impl core::str::FromStr for CipherKind {
             "aes-128-gcm" => Ok(AES_128_GCM),
             #[cfg(feature = "v1-aead")]
             "aes-256-gcm" => Ok(AES_256_GCM),
+
+            #[cfg(feature = "v1-aead-extra")]
+            "aes-128-gcm-siv" => Ok(AES_128_GCM_SIV),
+            #[cfg(feature = "v1-aead-extra")]
+            "aes-256-gcm-siv" => Ok(AES_256_GCM_SIV),
+
             #[cfg(feature = "v1-aead")]
             "chacha20-ietf-poly1305" => Ok(CHACHA20_POLY1305),
 
