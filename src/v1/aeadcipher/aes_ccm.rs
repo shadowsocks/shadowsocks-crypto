@@ -33,7 +33,7 @@ impl Aes128Ccm {
         let tag = self
             .0
             .encrypt_in_place_detached(nonce, &[], plaintext)
-            .expect("AES_128_GCM_SIV encrypt");
+            .expect("AES_128_CCM encrypt");
         out_tag.copy_from_slice(tag.as_slice())
     }
 
@@ -72,7 +72,7 @@ impl Aes256Ccm {
         let tag = self
             .0
             .encrypt_in_place_detached(nonce, &[], plaintext)
-            .expect("AES_256_GCM_SIV encrypt");
+            .expect("AES_256_CCM encrypt");
         out_tag.copy_from_slice(tag.as_slice())
     }
 
