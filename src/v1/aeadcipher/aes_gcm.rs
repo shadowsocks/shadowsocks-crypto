@@ -55,10 +55,9 @@ impl Aes128Gcm {
 
     pub fn decrypt(&mut self, nonce: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
         let nonce = Nonce::from_slice(nonce);
-        let (ciphertext, in_tag) =
-            ciphertext_in_plaintext_out.split_at_mut(ciphertext_in_plaintext_out.len() - Self::tag_size());
-        let in_tag = Tag::from_slice(in_tag);
-        self.0.decrypt_in_place_detached(nonce, &[], ciphertext, in_tag).is_ok()
+        // ring-compat marked decrypt_in_place_detached as unimplemented.
+        // But AES_128_GCM actually expects tag in the back. So it is safe to use `decrypt_in_place`.
+        self.0.decrypt_in_place(nonce, &[], buffer).is_ok()
     }
 }
 
@@ -95,9 +94,8 @@ impl Aes256Gcm {
 
     pub fn decrypt(&mut self, nonce: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
         let nonce = Nonce::from_slice(nonce);
-        let (ciphertext, in_tag) =
-            ciphertext_in_plaintext_out.split_at_mut(ciphertext_in_plaintext_out.len() - Self::tag_size());
-        let in_tag = Tag::from_slice(in_tag);
-        self.0.decrypt_in_place_detached(nonce, &[], ciphertext, in_tag).is_ok()
+        // ring-compat marked decrypt_in_place_detached as unimplemented.
+        // But AES_256_GCM actually expects tag in the back. So it is safe to use `decrypt_in_place`.
+        self.0.decrypt_in_place(nonce, &[], ciphertext_in_plaintext_out).is_ok()
     }
 }
