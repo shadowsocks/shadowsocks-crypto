@@ -1,4 +1,4 @@
-use crypto2::hash::Md5;
+use md5::{Digest, Md5};
 
 /// Table cipher
 #[derive(Clone)]
@@ -17,7 +17,9 @@ impl Table {
     const TABLE_SIZE: usize = 256;
 
     pub fn new(key: &[u8], _nonce: &[u8]) -> Self {
-        let h = Md5::oneshot(key);
+        let mut m = Md5::new();
+        m.update(key);
+        let h = m.finalize();
         let a = u64::from_le_bytes([h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7]]);
 
         let mut table = [0u64; Self::TABLE_SIZE];

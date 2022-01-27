@@ -1,7 +1,7 @@
 [package]
 name = "shadowsocks-crypto"
 version = "0.3.0"
-authors = ["luozijun <luozijun.assistant@gmail.com>"]
+authors = ["luozijun <luozijun.assistant@gmail.com>", "ty <zonyitoo@gmail.com>"]
 edition = "2018"
 license = "MIT"
 keywords = ["Cryptography"]
@@ -10,34 +10,28 @@ repository = "https://github.com/shadowsocks/shadowsocks-crypto"
 documentation = "https://docs.rs/shadowsocks-crypto"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-
-[dependencies]
-rand = "0.8"
-crypto2 = { version = "0.2", git = "https://github.com/shadowsocks/crypto2.git" }
-
-
-[target.'cfg(any(target_arch = "x86", target_arch = "x86_64"))'.dependencies]
-ring = { version  = "0.16", optional = true  }
-
-[target.'cfg(any(target_arch = "arm", target_arch = "aarch64"))'.dependencies]
-ring = { version  = "0.16", optional = true  }
-
-
-[dev-dependencies]
-hex = "0.4"
-
-
 [features]
 default = [
-    "std",
     "v1",
     "v1-aead",
 ]
-std = [
-    "crypto2/std",
-]
-nightly = []
 v1 = []
-v1-stream = ["v1"]
-v1-aead = ["v1"]
+v1-stream = ["v1", "chacha20", "aes"]
+v1-aead = ["v1", "aes-gcm", "chacha20poly1305", "hkdf", "sha1"]
 v1-aead-extra = ["v1-aead"]
+ring = ["ring-compat"]
+
+[dependencies]
+cfg-if = "1.0"
+rand = "0.8"
+aes-gcm = { version = "0.9", optional = true }
+chacha20poly1305 = { version = "0.9", optional = true }
+ring-compat = { version = "0.4", optional = true }
+md-5 = "0.10"
+hkdf = { version = "0.12", optional = true }
+sha1 = { version = "0.10", optional = true }
+chacha20 = { version = "0.8.1", optional = true }
+aes = { version = "0.7.5", features = ["ctr"], optional = true }
+
+[dev-dependencies]
+hex = "0.4"

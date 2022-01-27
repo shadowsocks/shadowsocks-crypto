@@ -1,6 +1,9 @@
 // 6.4 The Output Feedback Mode, (Page-20)
 // https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf
-use crypto2::blockcipher::{Aes128, Aes192, Aes256, Camellia128, Camellia192, Camellia256};
+use super::crypto::{
+    aes::{Aes128, Aes192, Aes256},
+    camellia::{Camellia128, Camellia192, Camellia256},
+};
 
 macro_rules! impl_block_cipher_with_ofb_mode {
     ($name:tt, $cipher:tt) => {
@@ -13,11 +16,12 @@ macro_rules! impl_block_cipher_with_ofb_mode {
         }
 
         impl $name {
-            pub const KEY_LEN: usize = $cipher::KEY_LEN;
+            pub const B: usize = Self::BLOCK_LEN * 8;
             pub const BLOCK_LEN: usize = $cipher::BLOCK_LEN;
             pub const IV_LEN: usize = $cipher::BLOCK_LEN;
+            pub const KEY_LEN: usize = $cipher::KEY_LEN;
 
-            pub const B: usize = Self::BLOCK_LEN * 8; // The block size, in bits.
+            // The block size, in bits.
 
             pub fn new(key: &[u8], iv: &[u8]) -> Self {
                 assert_eq!(key.len(), Self::KEY_LEN);

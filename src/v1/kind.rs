@@ -1,11 +1,10 @@
 //! Cipher Kind
 
 #[cfg(feature = "v1-aead-extra")]
-use super::aeadcipher::{
-    Aes128Ccm, Aes128GcmSiv, Aes256Ccm, Aes256GcmSiv, Sm4Ccm, Sm4Gcm, XChacha20Poly1305,
-};
+use super::aeadcipher::XChaCha20Poly1305;
 #[cfg(feature = "v1-aead")]
-use super::aeadcipher::{Aes128Gcm, Aes256Gcm, Chacha20Poly1305};
+use super::aeadcipher::{Aes128Gcm, Aes256Gcm, ChaCha20Poly1305};
+
 #[cfg(feature = "v1-stream")]
 use super::streamcipher::{
     Aes128Cfb1,
@@ -40,8 +39,10 @@ use super::streamcipher::{
     Camellia256Cfb8,
     Camellia256Ctr,
     Camellia256Ofb,
+
     Chacha20,
-    // Rc4, Rc4Md5, Table,
+    Rc4,
+    Rc4Md5,
 };
 
 /// Category of ciphers
@@ -195,35 +196,8 @@ pub enum CipherKind {
 
     #[cfg(feature = "v1-aead-extra")]
     #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
-    /// AEAD_AES_128_CCM
-    AES_128_CCM,
-    #[cfg(feature = "v1-aead-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
-    /// AEAD_AES_256_CCM
-    AES_256_CCM,
-
-    #[cfg(feature = "v1-aead-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
-    /// AEAD_AES_128_GCM_SIV
-    AES_128_GCM_SIV,
-    #[cfg(feature = "v1-aead-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
-    /// AEAD_AES_256_GCM_SIV
-    AES_256_GCM_SIV,
-
-    #[cfg(feature = "v1-aead-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
     /// AEAD_XCHACHA20_POLY1305
     XCHACHA20_POLY1305,
-
-    #[cfg(feature = "v1-aead-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
-    /// AEAD_SM4_GCM
-    SM4_GCM,
-    #[cfg(feature = "v1-aead-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
-    /// AEAD_SM4_CCM
-    SM4_CCM,
 }
 
 impl CipherKind {
@@ -254,14 +228,12 @@ impl CipherKind {
         use self::CipherKind::*;
 
         match *self {
-            SS_TABLE | SS_RC4_MD5 | AES_128_CTR | AES_192_CTR | AES_256_CTR | AES_128_CFB1
-            | AES_128_CFB8 | AES_128_CFB128 | AES_192_CFB1 | AES_192_CFB8 | AES_192_CFB128
-            | AES_256_CFB1 | AES_256_CFB8 | AES_256_CFB128 | AES_128_OFB | AES_192_OFB
-            | AES_256_OFB | CAMELLIA_128_CTR | CAMELLIA_192_CTR | CAMELLIA_256_CTR
-            | CAMELLIA_128_CFB1 | CAMELLIA_128_CFB8 | CAMELLIA_128_CFB128 | CAMELLIA_192_CFB1
-            | CAMELLIA_192_CFB8 | CAMELLIA_192_CFB128 | CAMELLIA_256_CFB1 | CAMELLIA_256_CFB8
-            | CAMELLIA_256_CFB128 | CAMELLIA_128_OFB | CAMELLIA_192_OFB | CAMELLIA_256_OFB
-            | RC4 | CHACHA20 => true,
+            SS_TABLE | SS_RC4_MD5 | AES_128_CTR | AES_192_CTR | AES_256_CTR | AES_128_CFB1 | AES_128_CFB8
+            | AES_128_CFB128 | AES_192_CFB1 | AES_192_CFB8 | AES_192_CFB128 | AES_256_CFB1 | AES_256_CFB8
+            | AES_256_CFB128 | AES_128_OFB | AES_192_OFB | AES_256_OFB | CAMELLIA_128_CTR | CAMELLIA_192_CTR
+            | CAMELLIA_256_CTR | CAMELLIA_128_CFB1 | CAMELLIA_128_CFB8 | CAMELLIA_128_CFB128 | CAMELLIA_192_CFB1
+            | CAMELLIA_192_CFB8 | CAMELLIA_192_CFB128 | CAMELLIA_256_CFB1 | CAMELLIA_256_CFB8 | CAMELLIA_256_CFB128
+            | CAMELLIA_128_OFB | CAMELLIA_192_OFB | CAMELLIA_256_OFB | RC4 | CHACHA20 => true,
             _ => false,
         }
     }
@@ -275,8 +247,7 @@ impl CipherKind {
             AES_128_GCM | AES_256_GCM | CHACHA20_POLY1305 => true,
 
             #[cfg(feature = "v1-aead-extra")]
-            AES_128_CCM | AES_256_CCM | AES_128_GCM_SIV | AES_256_GCM_SIV | XCHACHA20_POLY1305
-            | SM4_GCM | SM4_CCM => true,
+            XCHACHA20_POLY1305 => true,
 
             _ => false,
         }
@@ -291,10 +262,8 @@ impl CipherKind {
 
             #[cfg(feature = "v1-stream")]
             SS_TABLE => 0,
-            // NOTE: RC4 密码本身支持 1..256 长度的 Key，
-            //       但是 SS 这里把 Key 的长度限制在 16.
             #[cfg(feature = "v1-stream")]
-            SS_RC4_MD5 => 16,
+            SS_RC4_MD5 => Rc4Md5::key_size(),
 
             #[cfg(feature = "v1-stream")]
             AES_128_CTR => Aes128Ctr::KEY_LEN,
@@ -364,36 +333,21 @@ impl CipherKind {
             // NOTE: RC4 密码本身支持 1..256 长度的 Key，
             //       但是 SS 这里把 Key 的长度限制在 16.
             #[cfg(feature = "v1-stream")]
-            RC4 => 16,
+            RC4 => Rc4::key_size(),
             #[cfg(feature = "v1-stream")]
-            CHACHA20 => Chacha20::KEY_LEN,
+            CHACHA20 => Chacha20::key_size(),
 
             // AEAD
             #[cfg(feature = "v1-aead")]
-            AES_128_GCM => Aes128Gcm::KEY_LEN,
+            AES_128_GCM => Aes128Gcm::key_size(),
             #[cfg(feature = "v1-aead")]
-            AES_256_GCM => Aes256Gcm::KEY_LEN,
+            AES_256_GCM => Aes256Gcm::key_size(),
 
             #[cfg(feature = "v1-aead")]
-            CHACHA20_POLY1305 => Chacha20Poly1305::KEY_LEN,
+            CHACHA20_POLY1305 => ChaCha20Poly1305::key_size(),
 
             #[cfg(feature = "v1-aead-extra")]
-            AES_128_CCM => Aes128Ccm::KEY_LEN,
-            #[cfg(feature = "v1-aead-extra")]
-            AES_256_CCM => Aes256Ccm::KEY_LEN,
-
-            #[cfg(feature = "v1-aead-extra")]
-            AES_128_GCM_SIV => Aes128GcmSiv::KEY_LEN,
-            #[cfg(feature = "v1-aead-extra")]
-            AES_256_GCM_SIV => Aes256GcmSiv::KEY_LEN,
-
-            #[cfg(feature = "v1-aead-extra")]
-            XCHACHA20_POLY1305 => XChacha20Poly1305::KEY_LEN,
-
-            #[cfg(feature = "v1-aead-extra")]
-            SM4_GCM => Sm4Gcm::KEY_LEN,
-            #[cfg(feature = "v1-aead-extra")]
-            SM4_CCM => Sm4Ccm::KEY_LEN,
+            XCHACHA20_POLY1305 => XChaCha20Poly1305::key_size(),
         }
     }
 
@@ -405,9 +359,9 @@ impl CipherKind {
         match *self {
             NONE => 0,
             SS_TABLE => 0,
-            // NOTE: RC4 密码本身没有 IV 概念，
-            //       但是 SS 这里把 Key 的长度限制在 16.
-            SS_RC4_MD5 => 16,
+
+            SS_RC4_MD5 => Rc4Md5::nonce_size(),
+
             AES_128_CTR => Aes128Ctr::IV_LEN,
             AES_192_CTR => Aes192Ctr::IV_LEN,
             AES_256_CTR => Aes256Ctr::IV_LEN,
@@ -443,9 +397,10 @@ impl CipherKind {
             CAMELLIA_128_OFB => Camellia128Ofb::IV_LEN,
             CAMELLIA_192_OFB => Camellia192Ofb::IV_LEN,
             CAMELLIA_256_OFB => Camellia256Ofb::IV_LEN,
-            // NOTE: RC4 doesn't have an IV
-            RC4 => 0,
-            CHACHA20 => Chacha20::NONCE_LEN,
+
+            RC4 => Rc4::nonce_size(),
+            CHACHA20 => Chacha20::nonce_size(),
+
             _ => panic!("only support Stream ciphers"),
         }
     }
@@ -456,28 +411,13 @@ impl CipherKind {
         use self::CipherKind::*;
 
         match *self {
-            AES_128_GCM => Aes128Gcm::TAG_LEN,
-            AES_256_GCM => Aes256Gcm::TAG_LEN,
+            AES_128_GCM => Aes128Gcm::tag_size(),
+            AES_256_GCM => Aes256Gcm::tag_size(),
 
-            CHACHA20_POLY1305 => Chacha20Poly1305::TAG_LEN,
-
-            #[cfg(feature = "v1-aead-extra")]
-            AES_128_CCM => Aes128Ccm::TAG_LEN,
-            #[cfg(feature = "v1-aead-extra")]
-            AES_256_CCM => Aes256Ccm::TAG_LEN,
+            CHACHA20_POLY1305 => ChaCha20Poly1305::tag_size(),
 
             #[cfg(feature = "v1-aead-extra")]
-            AES_128_GCM_SIV => Aes128GcmSiv::TAG_LEN,
-            #[cfg(feature = "v1-aead-extra")]
-            AES_256_GCM_SIV => Aes256GcmSiv::TAG_LEN,
-
-            #[cfg(feature = "v1-aead-extra")]
-            XCHACHA20_POLY1305 => XChacha20Poly1305::TAG_LEN,
-
-            #[cfg(feature = "v1-aead-extra")]
-            SM4_GCM => Sm4Gcm::TAG_LEN,
-            #[cfg(feature = "v1-aead-extra")]
-            SM4_CCM => Sm4Ccm::TAG_LEN,
+            XCHACHA20_POLY1305 => XChaCha20Poly1305::tag_size(),
 
             _ => panic!("only support AEAD ciphers"),
         }
@@ -588,22 +528,7 @@ impl core::fmt::Display for CipherKind {
             CipherKind::CHACHA20_POLY1305 => "chacha20-ietf-poly1305",
 
             #[cfg(feature = "v1-aead-extra")]
-            CipherKind::AES_128_CCM => "aes-128-ccm",
-            #[cfg(feature = "v1-aead-extra")]
-            CipherKind::AES_256_CCM => "aes-256-ccm",
-
-            #[cfg(feature = "v1-aead-extra")]
-            CipherKind::AES_128_GCM_SIV => "aes-128-gcm-siv",
-            #[cfg(feature = "v1-aead-extra")]
-            CipherKind::AES_256_GCM_SIV => "aes-256-gcm-siv",
-
-            #[cfg(feature = "v1-aead-extra")]
             CipherKind::XCHACHA20_POLY1305 => "xchacha20-ietf-poly1305",
-
-            #[cfg(feature = "v1-aead-extra")]
-            CipherKind::SM4_GCM => "sm4-gcm",
-            #[cfg(feature = "v1-aead-extra")]
-            CipherKind::SM4_CCM => "sm4-ccm",
         })
     }
 }
@@ -728,22 +653,7 @@ impl core::str::FromStr for CipherKind {
             "chacha20-ietf-poly1305" => Ok(CHACHA20_POLY1305),
 
             #[cfg(feature = "v1-aead-extra")]
-            "aes-128-ccm" => Ok(AES_128_CCM),
-            #[cfg(feature = "v1-aead-extra")]
-            "aes-256-ccm" => Ok(AES_256_CCM),
-
-            #[cfg(feature = "v1-aead-extra")]
-            "aes-128-gcm-siv" => Ok(AES_128_GCM_SIV),
-            #[cfg(feature = "v1-aead-extra")]
-            "aes-256-gcm-siv" => Ok(AES_256_GCM_SIV),
-
-            #[cfg(feature = "v1-aead-extra")]
             "xchacha20-ietf-poly1305" => Ok(XCHACHA20_POLY1305),
-
-            #[cfg(feature = "v1-aead-extra")]
-            "sm4-gcm" => Ok(SM4_GCM),
-            #[cfg(feature = "v1-aead-extra")]
-            "sm4-ccm" => Ok(SM4_CCM),
 
             _ => Err(ParseCipherKindError),
         }

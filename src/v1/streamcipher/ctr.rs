@@ -1,6 +1,9 @@
 // 6.5 The Counter Mode, (Page-22)
 // https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf
-use crypto2::blockcipher::{Aes128, Aes192, Aes256, Camellia128, Camellia192, Camellia256};
+use super::crypto::{
+    aes::{Aes128, Aes192, Aes256},
+    camellia::{Camellia128, Camellia192, Camellia256},
+};
 
 macro_rules! impl_block_cipher_with_ctr_mode {
     ($name:tt, $cipher:tt) => {
@@ -13,9 +16,9 @@ macro_rules! impl_block_cipher_with_ctr_mode {
         }
 
         impl $name {
-            pub const KEY_LEN: usize = $cipher::KEY_LEN;
             pub const BLOCK_LEN: usize = $cipher::BLOCK_LEN;
             pub const IV_LEN: usize = $cipher::BLOCK_LEN;
+            pub const KEY_LEN: usize = $cipher::KEY_LEN;
 
             pub fn new(key: &[u8], iv: &[u8]) -> Self {
                 assert_eq!(Self::BLOCK_LEN, 16);
@@ -42,9 +45,7 @@ macro_rules! impl_block_cipher_with_ctr_mode {
             // NOTE: OpenSSL 的 CTR 模式把整个 Block 当作计数器。也就是 u128。
             #[inline]
             fn ctr128(counter_block: &mut [u8; Self::BLOCK_LEN]) {
-                let octets = u128::from_be_bytes(*counter_block)
-                    .wrapping_add(1)
-                    .to_be_bytes();
+                let octets = u128::from_be_bytes(*counter_block).wrapping_add(1).to_be_bytes();
                 counter_block.copy_from_slice(&octets)
             }
 

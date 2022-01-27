@@ -1,10 +1,11 @@
-use crypto2::hash::Md5;
-use crypto2::streamcipher::Rc4;
+use md5::{Digest, Md5};
+
+use crate::v1::streamcipher::crypto::rc4::Rc4 as CryptoRc4;
 
 /// Rc4Md5 Cipher
 #[derive(Clone)]
 pub struct Rc4Md5 {
-    cipher: Rc4,
+    cipher: CryptoRc4,
 }
 
 impl core::fmt::Debug for Rc4Md5 {
@@ -14,14 +15,8 @@ impl core::fmt::Debug for Rc4Md5 {
 }
 
 impl Rc4Md5 {
-    pub const MIN_KEY_LEN: usize = 1; // In bytes
-    pub const MAX_KEY_LEN: usize = usize::MAX;
-
-    // NOTE: RC4 本身没有 IV 概念，这个长度是 SS 制定的。
-    const IV_LEN: usize = 16;
-
     pub fn new(key: &[u8], salt: &[u8]) -> Self {
-        assert_eq!(salt.len(), Self::IV_LEN);
+        assert_eq!(salt.len(), Self::nonce_size());
 
         let mut m = Md5::new();
         m.update(key);
@@ -29,7 +24,7 @@ impl Rc4Md5 {
 
         let key = m.finalize();
 
-        let cipher = Rc4::new(&key);
+        let cipher = CryptoRc4::new(&key);
 
         Self { cipher }
     }
@@ -40,6 +35,16 @@ impl Rc4Md5 {
 
     pub fn decryptor_update(&mut self, ciphertext_in_plaintext_out: &mut [u8]) {
         self.cipher.decrypt_slice(ciphertext_in_plaintext_out)
+    }
+
+    pub const fn key_size() -> usize {
+        // Defined by Shadowsocks' specification.
+        16
+    }
+
+    pub const fn nonce_size() -> usize {
+        // Defined by Shadowsocks' specification.
+        0
     }
 }
 

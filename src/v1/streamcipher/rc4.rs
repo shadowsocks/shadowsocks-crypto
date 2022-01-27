@@ -3,17 +3,16 @@
 //!
 //! <https://en.wikipedia.org/wiki/RC4>
 
+use crate::v1::streamcipher::crypto::rc4::Rc4 as CryptoRc4;
+
 #[derive(Clone)]
 pub struct Rc4 {
-    cipher: crypto2::streamcipher::Rc4,
+    cipher: CryptoRc4,
 }
 
 impl Rc4 {
-    pub const MIN_KEY_LEN: usize = crypto2::streamcipher::Rc4::MIN_KEY_LEN;
-    pub const MAX_KEY_LEN: usize = crypto2::streamcipher::Rc4::MAX_KEY_LEN;
-
     pub fn new(key: &[u8], _nonce: &[u8]) -> Self {
-        let cipher = crypto2::streamcipher::Rc4::new(key);
+        let cipher = CryptoRc4::new(key);
 
         Self { cipher }
     }
@@ -24,5 +23,15 @@ impl Rc4 {
 
     pub fn decryptor_update(&mut self, ciphertext_in_plaintext_out: &mut [u8]) {
         self.cipher.decrypt_slice(ciphertext_in_plaintext_out);
+    }
+
+    pub const fn key_size() -> usize {
+        // Defined by Shadowsocks' specification.
+        16
+    }
+
+    pub const fn nonce_size() -> usize {
+        // Defined by Shadowsocks' specification.
+        0
     }
 }

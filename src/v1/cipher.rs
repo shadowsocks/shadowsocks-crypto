@@ -1,12 +1,8 @@
 #[cfg(feature = "v1-aead")]
 use super::aeadcipher::AeadCipher;
-use super::dummy::DummyCipher;
 #[cfg(feature = "v1-stream")]
 use super::streamcipher::StreamCipher;
-use super::CipherCategory;
-use super::CipherKind;
-
-use crypto2::hash::Md5;
+use super::{dummy::DummyCipher, CipherCategory, CipherKind};
 
 /// Get available ciphers in string representation
 ///
@@ -139,9 +135,19 @@ pub fn random_iv_or_salt(iv_or_salt: &mut [u8]) {
 
 /// Key derivation of OpenSSL's [EVP_BytesToKey](https://wiki.openssl.org/index.php/Manual:EVP_BytesToKey(3))
 pub fn openssl_bytes_to_key(password: &[u8], key: &mut [u8]) {
-    let key_len = key.len();
+    use md5::{
+        digest::{
+            generic_array::{typenum::Unsigned, GenericArray},
+            OutputSizeUser,
+        },
+        Digest,
+        Md5,
+    };
 
-    let mut last_digest: Option<[u8; Md5::DIGEST_LEN]> = None;
+    let key_len = key.len();
+    let digest_len = <Md5 as OutputSizeUser>::OutputSize::to_usize();
+
+    let mut last_digest: Option<GenericArray<u8, <Md5 as OutputSizeUser>::OutputSize>> = None;
 
     let mut offset = 0usize;
     while offset < key_len {
@@ -154,10 +160,10 @@ pub fn openssl_bytes_to_key(password: &[u8], key: &mut [u8]) {
 
         let digest = m.finalize();
 
-        let amt = std::cmp::min(key_len - offset, Md5::DIGEST_LEN);
+        let amt = std::cmp::min(key_len - offset, digest_len);
         key[offset..offset + amt].copy_from_slice(&digest[..amt]);
 
-        offset += Md5::DIGEST_LEN;
+        offset += digest_len;
         last_digest = Some(digest);
     }
 }
@@ -174,13 +180,17 @@ impl CipherInner for DummyCipher {
     fn ss_kind(&self) -> CipherKind {
         CipherKind::NONE
     }
+
     fn ss_category(&self) -> CipherCategory {
         CipherCategory::None
     }
+
     fn ss_tag_len(&self) -> usize {
         0
     }
+
     fn ss_encrypt_slice(&mut self, _plaintext_in_ciphertext_out: &mut [u8]) {}
+
     fn ss_decrypt_slice(&mut self, _ciphertext_in_plaintext_out: &mut [u8]) -> bool {
         true
     }
@@ -191,15 +201,19 @@ impl CipherInner for StreamCipher {
     fn ss_kind(&self) -> CipherKind {
         self.kind()
     }
+
     fn ss_category(&self) -> CipherCategory {
         CipherCategory::Stream
     }
+
     fn ss_tag_len(&self) -> usize {
         0
     }
+
     fn ss_encrypt_slice(&mut self, plaintext_in_ciphertext_out: &mut [u8]) {
         self.encrypt(plaintext_in_ciphertext_out)
     }
+
     fn ss_decrypt_slice(&mut self, ciphertext_in_plaintext_out: &mut [u8]) -> bool {
         self.decrypt(ciphertext_in_plaintext_out);
         true
@@ -211,15 +225,19 @@ impl CipherInner for AeadCipher {
     fn ss_kind(&self) -> CipherKind {
         self.kind()
     }
+
     fn ss_category(&self) -> CipherCategory {
         CipherCategory::Aead
     }
+
     fn ss_tag_len(&self) -> usize {
         self.tag_len()
     }
+
     fn ss_encrypt_slice(&mut self, plaintext_in_ciphertext_out: &mut [u8]) {
         self.encrypt(plaintext_in_ciphertext_out)
     }
+
     fn ss_decrypt_slice(&mut self, ciphertext_in_plaintext_out: &mut [u8]) -> bool {
         self.decrypt(ciphertext_in_plaintext_out)
     }
@@ -258,11 +276,6 @@ macro_rules! cipher_method_forward {
 }
 
 impl Cipher {
-    #[cfg(feature = "v1-aead")]
-    const MAX_KEY_LEN: usize = 64;
-    #[cfg(feature = "v1-aead")]
-    const SUBKEY_INFO: &'static [u8] = b"ss-subkey";
-
     /// Create a new Cipher of `kind`
     ///
     /// - Stream Ciphers initialize with IV
@@ -281,15 +294,18 @@ impl Cipher {
             CipherCategory::Stream => Cipher::Stream(StreamCipher::new(kind, key, iv_or_salt)),
             #[cfg(feature = "v1-aead")]
             CipherCategory::Aead => {
-                use crypto2::kdf::HkdfSha1;
+                use hkdf::Hkdf;
+                use sha1::Sha1;
 
-                // Gen SubKey
+                const MAX_KEY_LEN: usize = 64;
+                const SUBKEY_INFO: &'static [u8] = b"ss-subkey";
+
                 let ikm = key;
-                let mut okm = [0u8; Self::MAX_KEY_LEN];
-                HkdfSha1::oneshot(&iv_or_salt, ikm, Self::SUBKEY_INFO, &mut okm[..ikm.len()]);
+                let hk = Hkdf::<Sha1>::new(Some(iv_or_salt), ikm);
+                let mut okm = [0u8; MAX_KEY_LEN];
+                hk.expand(SUBKEY_INFO, &mut okm).expect("HKDF-SHA1");
 
                 let subkey = &okm[..ikm.len()];
-
                 Cipher::Aead(AeadCipher::new(kind, subkey))
             }
         }

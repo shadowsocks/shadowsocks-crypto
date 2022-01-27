@@ -1,6 +1,9 @@
 // 6.3 The Cipher Feedback Mode, (Page-18)
 // https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf
-use crypto2::blockcipher::{Aes128, Aes192, Aes256, Camellia128, Camellia192, Camellia256};
+use super::crypto::{
+    aes::{Aes128, Aes192, Aes256},
+    camellia::{Camellia128, Camellia192, Camellia256},
+};
 
 #[derive(Debug, Clone, Copy)]
 struct Bits(pub u8);
@@ -48,11 +51,14 @@ macro_rules! impl_block_cipher_with_cfb1_mode {
         }
 
         impl $name {
-            pub const KEY_LEN: usize = $cipher::KEY_LEN;
+            pub const B: usize = Self::BLOCK_LEN * 8;
             pub const BLOCK_LEN: usize = $cipher::BLOCK_LEN;
             pub const IV_LEN: usize = $cipher::BLOCK_LEN;
-            pub const B: usize = Self::BLOCK_LEN * 8; // The block size, in bits.
-            pub const S: usize = 1; // The number of bits in a data segment.
+            pub const KEY_LEN: usize = $cipher::KEY_LEN;
+            // The block size, in bits.
+            pub const S: usize = 1;
+
+            // The number of bits in a data segment.
 
             pub fn new(key: &[u8], iv: &[u8]) -> Self {
                 assert!(Self::BLOCK_LEN <= 16);
@@ -123,11 +129,14 @@ macro_rules! impl_block_cipher_with_cfb8_mode {
         }
 
         impl $name {
-            pub const KEY_LEN: usize = $cipher::KEY_LEN;
+            pub const B: usize = Self::BLOCK_LEN * 8;
             pub const BLOCK_LEN: usize = $cipher::BLOCK_LEN;
             pub const IV_LEN: usize = $cipher::BLOCK_LEN;
-            pub const B: usize = Self::BLOCK_LEN * 8; // The block size, in bits.
-            pub const S: usize = 8; // The number of bits in a data segment.
+            pub const KEY_LEN: usize = $cipher::KEY_LEN;
+            // The block size, in bits.
+            pub const S: usize = 8;
+
+            // The number of bits in a data segment.
 
             pub fn new(key: &[u8], iv: &[u8]) -> Self {
                 assert!(Self::S <= Self::B);
@@ -197,11 +206,14 @@ macro_rules! impl_block_cipher_with_cfb128_mode {
         }
 
         impl $name {
-            pub const KEY_LEN: usize = $cipher::KEY_LEN;
+            pub const B: usize = Self::BLOCK_LEN * 8;
             pub const BLOCK_LEN: usize = $cipher::BLOCK_LEN;
             pub const IV_LEN: usize = $cipher::BLOCK_LEN;
-            pub const B: usize = Self::BLOCK_LEN * 8; // The block size, in bits.
-            pub const S: usize = 128; // The number of bits in a data segment.
+            pub const KEY_LEN: usize = $cipher::KEY_LEN;
+            // The block size, in bits.
+            pub const S: usize = 128;
+
+            // The number of bits in a data segment.
 
             pub fn new(key: &[u8], iv: &[u8]) -> Self {
                 assert!(Self::S <= Self::B);

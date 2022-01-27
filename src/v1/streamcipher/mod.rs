@@ -4,19 +4,14 @@ use super::CipherKind;
 
 mod cfb;
 mod chacha20;
+mod crypto;
 mod ctr;
 mod ofb;
 mod rc4;
 mod rc4_md5;
 mod table;
 
-pub use self::cfb::*;
-pub use self::chacha20::*;
-pub use self::ctr::*;
-pub use self::ofb::*;
-pub use self::rc4::*;
-pub use self::rc4_md5::*;
-pub use self::table::*;
+pub use self::{cfb::*, chacha20::*, ctr::*, ofb::*, rc4::*, rc4_md5::*, table::*};
 
 trait StreamCipherExt {
     fn sc_kind(&self) -> CipherKind;
@@ -32,12 +27,15 @@ macro_rules! impl_cipher {
             fn sc_kind(&self) -> CipherKind {
                 CipherKind::$kind
             }
+
             fn sc_key_len(&self) -> usize {
                 self.sc_kind().key_len()
             }
+
             fn sc_iv_len(&self) -> usize {
                 self.sc_kind().iv_len()
             }
+
             fn sc_encrypt_slice(&mut self, plaintext_in_ciphertext_out: &mut [u8]) {
                 self.encryptor_update(plaintext_in_ciphertext_out);
             }
