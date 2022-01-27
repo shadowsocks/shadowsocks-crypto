@@ -15,7 +15,7 @@ impl Aes128Ccm {
     }
 
     pub fn key_size() -> usize {
-        <Ccm<Aes256, U16, U12> as NewAead>::KeySize::to_usize()
+        <Ccm<Aes128, U16, U12> as NewAead>::KeySize::to_usize()
     }
 
     pub fn nonce_size() -> usize {
