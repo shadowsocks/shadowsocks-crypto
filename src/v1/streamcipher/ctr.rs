@@ -1,9 +1,83 @@
 // 6.5 The Counter Mode, (Page-22)
 // https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf
+
+use aes::{
+    cipher::{generic_array::GenericArray, FromBlockCipher, NewBlockCipher, StreamCipher},
+    Aes128 as CryptoAes128,
+    Aes128Ctr as CryptoAes128Ctr,
+    Aes192 as CryptoAes192,
+    Aes192Ctr as CryptoAes192Ctr,
+    Aes256 as CryptoAes256,
+    Aes256Ctr as CryptoAes256Ctr,
+};
+
 use super::crypto::{
     aes::{Aes128, Aes192, Aes256},
     camellia::{Camellia128, Camellia192, Camellia256},
 };
+
+pub struct Aes128Ctr(CryptoAes128Ctr);
+
+impl Aes128Ctr {
+    pub const IV_LEN: usize = aes::BLOCK_SIZE;
+    pub const KEY_LEN: usize = Aes128::KEY_LEN;
+
+    pub fn new(key: &[u8], iv: &[u8]) -> Aes128Ctr {
+        let cipher = CryptoAes128::new_from_slice(key).expect("Aes128");
+        let ctr = CryptoAes128Ctr::from_block_cipher(cipher, GenericArray::from_slice(iv));
+        Aes128Ctr(ctr)
+    }
+
+    pub fn encryptor_update(&mut self, plaintext_in_ciphertext_out: &mut [u8]) {
+        self.0.apply_keystream(plaintext_in_ciphertext_out);
+    }
+
+    pub fn decryptor_update(&mut self, ciphertext_in_plaintext_out: &mut [u8]) {
+        self.0.apply_keystream(ciphertext_in_plaintext_out);
+    }
+}
+
+pub struct Aes192Ctr(CryptoAes192Ctr);
+
+impl Aes192Ctr {
+    pub const IV_LEN: usize = aes::BLOCK_SIZE;
+    pub const KEY_LEN: usize = Aes192::KEY_LEN;
+
+    pub fn new(key: &[u8], iv: &[u8]) -> Aes192Ctr {
+        let cipher = CryptoAes192::new_from_slice(key).expect("Aes192");
+        let ctr = CryptoAes192Ctr::from_block_cipher(cipher, GenericArray::from_slice(iv));
+        Aes192Ctr(ctr)
+    }
+
+    pub fn encryptor_update(&mut self, plaintext_in_ciphertext_out: &mut [u8]) {
+        self.0.apply_keystream(plaintext_in_ciphertext_out);
+    }
+
+    pub fn decryptor_update(&mut self, ciphertext_in_plaintext_out: &mut [u8]) {
+        self.0.apply_keystream(ciphertext_in_plaintext_out);
+    }
+}
+
+pub struct Aes256Ctr(CryptoAes256Ctr);
+
+impl Aes256Ctr {
+    pub const IV_LEN: usize = aes::BLOCK_SIZE;
+    pub const KEY_LEN: usize = Aes256::KEY_LEN;
+
+    pub fn new(key: &[u8], iv: &[u8]) -> Aes256Ctr {
+        let cipher = CryptoAes256::new_from_slice(key).expect("Aes256");
+        let ctr = CryptoAes256Ctr::from_block_cipher(cipher, GenericArray::from_slice(iv));
+        Aes256Ctr(ctr)
+    }
+
+    pub fn encryptor_update(&mut self, plaintext_in_ciphertext_out: &mut [u8]) {
+        self.0.apply_keystream(plaintext_in_ciphertext_out);
+    }
+
+    pub fn decryptor_update(&mut self, ciphertext_in_plaintext_out: &mut [u8]) {
+        self.0.apply_keystream(ciphertext_in_plaintext_out);
+    }
+}
 
 macro_rules! impl_block_cipher_with_ctr_mode {
     ($name:tt, $cipher:tt) => {
@@ -76,9 +150,6 @@ macro_rules! impl_block_cipher_with_ctr_mode {
     };
 }
 
-impl_block_cipher_with_ctr_mode!(Aes128Ctr, Aes128);
-impl_block_cipher_with_ctr_mode!(Aes192Ctr, Aes192);
-impl_block_cipher_with_ctr_mode!(Aes256Ctr, Aes256);
 impl_block_cipher_with_ctr_mode!(Camellia128Ctr, Camellia128);
 impl_block_cipher_with_ctr_mode!(Camellia192Ctr, Camellia192);
 impl_block_cipher_with_ctr_mode!(Camellia256Ctr, Camellia256);

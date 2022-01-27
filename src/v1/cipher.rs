@@ -99,20 +99,20 @@ pub const fn available_ciphers() -> &'static [&'static str] {
         "aes-256-gcm",
         #[cfg(feature = "v1-aead")]
         "chacha20-ietf-poly1305",
-        // #[cfg(feature = "v1-aead-extra")]
-        // "aes-128-ccm",
-        // #[cfg(feature = "v1-aead-extra")]
-        // "aes-256-ccm",
+        #[cfg(feature = "v1-aead-extra")]
+        "aes-128-ccm",
+        #[cfg(feature = "v1-aead-extra")]
+        "aes-256-ccm",
         #[cfg(feature = "v1-aead-extra")]
         "aes-128-gcm-siv",
         #[cfg(feature = "v1-aead-extra")]
         "aes-256-gcm-siv",
         #[cfg(feature = "v1-aead-extra")]
         "xchacha20-ietf-poly1305",
-        // #[cfg(feature = "v1-aead-extra")]
-        // "sm4-gcm",
-        // #[cfg(feature = "v1-aead-extra")]
-        // "sm4-ccm",
+        #[cfg(feature = "v1-aead-extra")]
+        "sm4-gcm",
+        #[cfg(feature = "v1-aead-extra")]
+        "sm4-ccm",
     ]
 }
 
