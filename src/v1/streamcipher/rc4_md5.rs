@@ -44,7 +44,7 @@ impl Rc4Md5 {
 
     pub const fn nonce_size() -> usize {
         // Defined by Shadowsocks' specification.
-        0
+        16
     }
 }
 

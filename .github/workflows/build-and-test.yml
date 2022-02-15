@@ -39,8 +39,8 @@ jobs:
         run: cargo test --verbose --no-fail-fast
       - name: Build & Test (--no-default-features)
         run: cargo test --verbose --no-default-features --no-fail-fast
-      - name: Build with All Features Enabled
-        run: cargo build --verbose --all-features
+      - name: Build & Test with All Features Enabled
+        run: cargo test --verbose --all-features
       - name: Clippy Check
         uses: actions-rs/clippy-check@v1
         with:
