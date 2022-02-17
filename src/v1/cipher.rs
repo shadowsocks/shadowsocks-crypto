@@ -135,19 +135,11 @@ pub fn random_iv_or_salt(iv_or_salt: &mut [u8]) {
 
 /// Key derivation of OpenSSL's [EVP_BytesToKey](https://wiki.openssl.org/index.php/Manual:EVP_BytesToKey(3))
 pub fn openssl_bytes_to_key(password: &[u8], key: &mut [u8]) {
-    use md5::{
-        digest::{
-            generic_array::{typenum::Unsigned, GenericArray},
-            OutputSizeUser,
-        },
-        Digest,
-        Md5,
-    };
+    use md5::{Digest, Md5};
 
     let key_len = key.len();
-    let digest_len = <Md5 as OutputSizeUser>::OutputSize::to_usize();
 
-    let mut last_digest: Option<GenericArray<u8, <Md5 as OutputSizeUser>::OutputSize>> = None;
+    let mut last_digest = None;
 
     let mut offset = 0usize;
     while offset < key_len {
@@ -160,10 +152,10 @@ pub fn openssl_bytes_to_key(password: &[u8], key: &mut [u8]) {
 
         let digest = m.finalize();
 
-        let amt = std::cmp::min(key_len - offset, digest_len);
+        let amt = std::cmp::min(key_len - offset, digest.len());
         key[offset..offset + amt].copy_from_slice(&digest[..amt]);
 
-        offset += digest_len;
+        offset += amt;
         last_digest = Some(digest);
     }
 }

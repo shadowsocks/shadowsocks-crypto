@@ -1,6 +1,6 @@
 [package]
 name = "shadowsocks-crypto"
-version = "0.3.2"
+version = "0.3.3"
 authors = ["luozijun <luozijun.assistant@gmail.com>", "ty <zonyitoo@gmail.com>"]
 edition = "2021"
 license = "MIT"
@@ -44,12 +44,12 @@ sha1 = { version = "0.10", features = ["asm"], optional = true }
 [target.'cfg(all(unix, target_arch = "aarch64"))'.dependencies]
 sha1 = { version = "0.10", features = ["asm"], optional = true }
 
-[target.'cfg(all(windows, any(target_arch = "x86", target_arch = "x86_64"), target_env = "gnu"))'.dependencies]
-md-5 = { version = "0.10", features = ["asm"] }
-sha1 = { version = "0.10", features = ["asm"], optional = true }
+#[target.'cfg(all(windows, any(target_arch = "x86", target_arch = "x86_64"), target_env = "gnu"))'.dependencies]
+#md-5 = { version = "0.10", features = ["asm"] }
+#sha1 = { version = "0.10", features = ["asm"], optional = true }
 
-[target.'cfg(all(windows, target_arch = "aarch64", target_env = "gnu"))'.dependencies]
-sha1 = { version = "0.10", features = ["asm"], optional = true }
+#[target.'cfg(all(windows, target_arch = "aarch64", target_env = "gnu"))'.dependencies]
+#sha1 = { version = "0.10", features = ["asm"], optional = true }
 
 [dev-dependencies]
 hex = "0.4"
