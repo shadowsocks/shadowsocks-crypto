@@ -1,6 +1,6 @@
 [package]
 name = "shadowsocks-crypto"
-version = "0.3.4"
+version = "0.3.5"
 authors = ["luozijun <luozijun.assistant@gmail.com>", "ty <zonyitoo@gmail.com>"]
 edition = "2021"
 license = "MIT"
@@ -41,7 +41,7 @@ aes = { version = "0.7.5", features = ["ctr"], optional = true }
 md-5 = { version = "0.10", features = ["asm"] }
 sha1 = { version = "0.10", features = ["asm"], optional = true }
 
-[target.'cfg(all(unix, target_arch = "aarch64", not(target_os = "ios")))'.dependencies]
+[target.'cfg(all(unix, target_arch = "aarch64", any(target_os = "linux", target_os = "macos")))'.dependencies]
 sha1 = { version = "0.10", features = ["asm"], optional = true }
 
 #[target.'cfg(all(windows, any(target_arch = "x86", target_arch = "x86_64"), target_env = "gnu"))'.dependencies]
