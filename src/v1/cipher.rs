@@ -286,16 +286,42 @@ impl Cipher {
             CipherCategory::Stream => Cipher::Stream(StreamCipher::new(kind, key, iv_or_salt)),
             #[cfg(feature = "v1-aead")]
             CipherCategory::Aead => {
-                use hkdf::Hkdf;
-                use sha1::Sha1;
+                use cfg_if::cfg_if;
 
-                const MAX_KEY_LEN: usize = 64;
                 const SUBKEY_INFO: &'static [u8] = b"ss-subkey";
+                const MAX_KEY_LEN: usize = 64;
 
                 let ikm = key;
-                let hk = Hkdf::<Sha1>::new(Some(iv_or_salt), ikm);
                 let mut okm = [0u8; MAX_KEY_LEN];
-                hk.expand(SUBKEY_INFO, &mut okm).expect("HKDF-SHA1");
+
+                cfg_if! {
+                    if #[cfg(feature = "ring")] {
+                        use ring_compat::ring::hkdf::{Salt, HKDF_SHA1_FOR_LEGACY_USE_ONLY, KeyType};
+
+                        struct CryptoKeyType(usize);
+
+                        impl KeyType for CryptoKeyType {
+                            #[inline]
+                            fn len(&self) -> usize {
+                                self.0
+                            }
+                        }
+
+                        let salt = Salt::new(HKDF_SHA1_FOR_LEGACY_USE_ONLY, iv_or_salt);
+                        let prk = salt.extract(ikm);
+                        let rokm = prk
+                            .expand(&[SUBKEY_INFO], CryptoKeyType(ikm.len()))
+                            .expect("HKDF-SHA1-EXPAND");
+
+                        rokm.fill(&mut okm[..ikm.len()]).expect("HKDF-SHA1-FILL");
+                    } else {
+                        use hkdf::Hkdf;
+                        use sha1::Sha1;
+
+                        let hk = Hkdf::<Sha1>::new(Some(iv_or_salt), ikm);
+                        hk.expand(SUBKEY_INFO, &mut okm).expect("HKDF-SHA1");
+                    }
+                }
 
                 let subkey = &okm[..ikm.len()];
                 Cipher::Aead(AeadCipher::new(kind, subkey))

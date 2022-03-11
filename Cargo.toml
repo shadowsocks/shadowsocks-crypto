@@ -30,7 +30,7 @@ aes-gcm = { version = "0.9", optional = true }
 aes-gcm-siv = { version = "0.10.3", optional = true }
 ccm = { version = "0.4.4", optional = true }
 chacha20poly1305 = { version = "0.9", optional = true }
-ring-compat = { version = "0.4", optional = true }
+ring-compat = { version = "0.4", optional = true, git = "https://github.com/RustCrypto/ring-compat.git" }
 md-5 = { version = "0.10" }
 hkdf = { version = "0.12", optional = true }
 sha1 = { version = "0.10", optional = true }
