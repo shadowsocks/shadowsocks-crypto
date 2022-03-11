@@ -118,6 +118,8 @@ pub const fn available_ciphers() -> &'static [&'static str] {
 
 /// Generate random bytes into `iv_or_salt`
 pub fn random_iv_or_salt(iv_or_salt: &mut [u8]) {
+    use rand::Rng;
+
     // Gen IV or Gen Salt by KEY-LEN
     if iv_or_salt.is_empty() {
         return;
@@ -125,7 +127,7 @@ pub fn random_iv_or_salt(iv_or_salt: &mut [u8]) {
 
     let mut rng = rand::thread_rng();
     loop {
-        rand::Rng::fill(&mut rng, iv_or_salt);
+        rng.fill(iv_or_salt);
 
         // https://stackoverflow.com/questions/65367552/checking-a-vecu8-to-see-if-its-all-zero
         let (prefix, aligned, suffix) = unsafe { iv_or_salt.align_to::<u128>() };
