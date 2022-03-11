@@ -126,7 +126,12 @@ pub fn random_iv_or_salt(iv_or_salt: &mut [u8]) {
     let mut rng = rand::thread_rng();
     loop {
         rand::Rng::fill(&mut rng, iv_or_salt);
-        let is_zeros = iv_or_salt.iter().all(|&x| x == 0);
+
+        // https://stackoverflow.com/questions/65367552/checking-a-vecu8-to-see-if-its-all-zero
+        let (prefix, aligned, suffix) = unsafe { iv_or_salt.align_to::<u128>() };
+        let is_zeros =
+            prefix.iter().all(|&x| x == 0) && aligned.iter().all(|&x| x == 0) && suffix.iter().all(|&x| x == 0);
+
         if !is_zeros {
             break;
         }
