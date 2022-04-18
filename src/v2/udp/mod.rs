@@ -27,14 +27,14 @@ impl CipherVariant {
 
     fn encrypt_packet(&mut self, salt: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
         match *self {
-            CipherVariant::AesGcm(ref mut c) => c.encrypt_packet(plaintext_in_ciphertext_out),
+            CipherVariant::AesGcm(ref mut c) => c.encrypt_packet(salt, plaintext_in_ciphertext_out),
             CipherVariant::ChaCha20Poly1305(ref mut c) => c.encrypt_packet(salt, plaintext_in_ciphertext_out),
         }
     }
 
     fn decrypt_packet(&mut self, salt: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
         match *self {
-            CipherVariant::AesGcm(ref mut c) => c.decrypt_packet(ciphertext_in_plaintext_out),
+            CipherVariant::AesGcm(ref mut c) => c.decrypt_packet(salt, ciphertext_in_plaintext_out),
             CipherVariant::ChaCha20Poly1305(ref mut c) => c.decrypt_packet(salt, ciphertext_in_plaintext_out),
         }
     }

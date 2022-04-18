@@ -40,29 +40,17 @@ impl Cipher {
         Aes128Gcm::nonce_size()
     }
 
-    pub fn encrypt_packet(&mut self, plaintext_in_ciphertext_out: &mut [u8]) {
-        debug_assert!(plaintext_in_ciphertext_out.len() >= 8 + 8 + 16);
-
-        // Use packet's header [4:16] as nonce
-        let (packet_header, payload) = plaintext_in_ciphertext_out.split_at_mut(16);
-        let nonce = &packet_header[4..];
-
+    pub fn encrypt_packet(&mut self, salt: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
         match *self {
-            Cipher::Aes128Gcm(ref mut c) => c.encrypt(nonce, payload),
-            Cipher::Aes256Gcm(ref mut c) => c.encrypt(nonce, payload),
+            Cipher::Aes128Gcm(ref mut c) => c.encrypt(salt, plaintext_in_ciphertext_out),
+            Cipher::Aes256Gcm(ref mut c) => c.encrypt(salt, plaintext_in_ciphertext_out),
         }
     }
 
-    pub fn decrypt_packet(&mut self, ciphertext_in_plaintext_out: &mut [u8]) -> bool {
-        debug_assert!(ciphertext_in_plaintext_out.len() >= 8 + 8 + 16);
-
-        // Use packet's header [4:16] as nonce
-        let (packet_header, payload) = ciphertext_in_plaintext_out.split_at_mut(16);
-        let nonce = &packet_header[4..];
-
+    pub fn decrypt_packet(&mut self, salt: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
         match *self {
-            Cipher::Aes128Gcm(ref mut c) => c.decrypt(nonce, payload),
-            Cipher::Aes256Gcm(ref mut c) => c.decrypt(nonce, payload),
+            Cipher::Aes128Gcm(ref mut c) => c.decrypt(salt, plaintext_in_ciphertext_out),
+            Cipher::Aes256Gcm(ref mut c) => c.decrypt(salt, plaintext_in_ciphertext_out),
         }
     }
 }
