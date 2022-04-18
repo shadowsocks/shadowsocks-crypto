@@ -65,7 +65,7 @@ impl ChaCha20Poly1305 {
         <CryptoChaCha20Poly1305 as AeadCore>::TagSize::to_usize()
     }
 
-    pub fn encrypt(&mut self, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
+    pub fn encrypt(&self, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
         let nonce = Nonce::from_slice(nonce);
         let (plaintext, out_tag) =
             plaintext_in_ciphertext_out.split_at_mut(plaintext_in_ciphertext_out.len() - Self::tag_size());
@@ -76,7 +76,7 @@ impl ChaCha20Poly1305 {
         out_tag.copy_from_slice(tag.as_slice())
     }
 
-    pub fn decrypt(&mut self, nonce: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
+    pub fn decrypt(&self, nonce: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
         let nonce = Nonce::from_slice(nonce);
 
         cfg_if! {

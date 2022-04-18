@@ -2,9 +2,6 @@
 
 use crate::v2::crypto::XChaCha20Poly1305;
 
-/// xchacha20-poly1305 nonce size = Cipher::nonce_size()
-const NONCE_SIZE: usize = 24;
-
 pub struct Cipher {
     cipher: XChaCha20Poly1305,
 }

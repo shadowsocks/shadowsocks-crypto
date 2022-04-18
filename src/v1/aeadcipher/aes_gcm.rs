@@ -65,7 +65,7 @@ impl Aes128Gcm {
         <CryptoAes128Gcm as AeadCore>::TagSize::to_usize()
     }
 
-    pub fn encrypt(&mut self, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
+    pub fn encrypt(&self, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
         let nonce = Nonce::from_slice(nonce);
         let (plaintext, out_tag) =
             plaintext_in_ciphertext_out.split_at_mut(plaintext_in_ciphertext_out.len() - Self::tag_size());
@@ -76,7 +76,7 @@ impl Aes128Gcm {
         out_tag.copy_from_slice(tag.as_slice())
     }
 
-    pub fn decrypt(&mut self, nonce: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
+    pub fn decrypt(&self, nonce: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
         let nonce = Nonce::from_slice(nonce);
 
         cfg_if! {
@@ -116,7 +116,7 @@ impl Aes256Gcm {
         <CryptoAes256Gcm as AeadCore>::TagSize::to_usize()
     }
 
-    pub fn encrypt(&mut self, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
+    pub fn encrypt(&self, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
         let nonce = Nonce::from_slice(nonce);
         let (plaintext, out_tag) =
             plaintext_in_ciphertext_out.split_at_mut(plaintext_in_ciphertext_out.len() - Self::tag_size());
@@ -127,7 +127,7 @@ impl Aes256Gcm {
         out_tag.copy_from_slice(tag.as_slice())
     }
 
-    pub fn decrypt(&mut self, nonce: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
+    pub fn decrypt(&self, nonce: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
         let nonce = Nonce::from_slice(nonce);
         cfg_if! {
             if #[cfg(feature = "ring")] {
