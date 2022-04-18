@@ -53,7 +53,7 @@ use crate::v2::crypto::{
 };
 
 /// Category of ciphers
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Hash)]
 pub enum CipherCategory {
     /// No encryption
     None,
@@ -74,7 +74,7 @@ pub enum CipherCategory {
 /// ShadowSocks cipher type
 #[allow(non_camel_case_types)]
 #[allow(clippy::upper_case_acronyms)]
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Hash)]
 pub enum CipherKind {
     NONE,
 
