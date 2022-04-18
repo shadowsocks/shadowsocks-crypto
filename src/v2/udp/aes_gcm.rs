@@ -40,17 +40,17 @@ impl Cipher {
         Aes128Gcm::nonce_size()
     }
 
-    pub fn encrypt_packet(&mut self, salt: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
+    pub fn encrypt_packet(&self, salt: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
         match *self {
-            Cipher::Aes128Gcm(ref mut c) => c.encrypt(salt, plaintext_in_ciphertext_out),
-            Cipher::Aes256Gcm(ref mut c) => c.encrypt(salt, plaintext_in_ciphertext_out),
+            Cipher::Aes128Gcm(ref c) => c.encrypt(salt, plaintext_in_ciphertext_out),
+            Cipher::Aes256Gcm(ref c) => c.encrypt(salt, plaintext_in_ciphertext_out),
         }
     }
 
-    pub fn decrypt_packet(&mut self, salt: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
+    pub fn decrypt_packet(&self, salt: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
         match *self {
-            Cipher::Aes128Gcm(ref mut c) => c.decrypt(salt, plaintext_in_ciphertext_out),
-            Cipher::Aes256Gcm(ref mut c) => c.decrypt(salt, plaintext_in_ciphertext_out),
+            Cipher::Aes128Gcm(ref c) => c.decrypt(salt, plaintext_in_ciphertext_out),
+            Cipher::Aes256Gcm(ref c) => c.decrypt(salt, plaintext_in_ciphertext_out),
         }
     }
 }

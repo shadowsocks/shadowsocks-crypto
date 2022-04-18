@@ -25,17 +25,17 @@ impl CipherVariant {
         }
     }
 
-    fn encrypt_packet(&mut self, salt: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
+    fn encrypt_packet(&self, salt: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
         match *self {
-            CipherVariant::AesGcm(ref mut c) => c.encrypt_packet(salt, plaintext_in_ciphertext_out),
-            CipherVariant::ChaCha20Poly1305(ref mut c) => c.encrypt_packet(salt, plaintext_in_ciphertext_out),
+            CipherVariant::AesGcm(ref c) => c.encrypt_packet(salt, plaintext_in_ciphertext_out),
+            CipherVariant::ChaCha20Poly1305(ref c) => c.encrypt_packet(salt, plaintext_in_ciphertext_out),
         }
     }
 
-    fn decrypt_packet(&mut self, salt: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
+    fn decrypt_packet(&self, salt: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
         match *self {
-            CipherVariant::AesGcm(ref mut c) => c.decrypt_packet(salt, ciphertext_in_plaintext_out),
-            CipherVariant::ChaCha20Poly1305(ref mut c) => c.decrypt_packet(salt, ciphertext_in_plaintext_out),
+            CipherVariant::AesGcm(ref c) => c.decrypt_packet(salt, ciphertext_in_plaintext_out),
+            CipherVariant::ChaCha20Poly1305(ref c) => c.decrypt_packet(salt, ciphertext_in_plaintext_out),
         }
     }
 }
@@ -68,12 +68,12 @@ impl UdpCipher {
     }
 
     /// Encrypt a UDP packet, including packet header
-    pub fn encrypt_packet(&mut self, salt: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
+    pub fn encrypt_packet(&self, salt: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
         self.cipher.encrypt_packet(salt, plaintext_in_ciphertext_out)
     }
 
     /// Decrypt a UDP packet, including packet header
-    pub fn decrypt_packet(&mut self, salt: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
+    pub fn decrypt_packet(&self, salt: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
         self.cipher.decrypt_packet(salt, ciphertext_in_plaintext_out)
     }
 }

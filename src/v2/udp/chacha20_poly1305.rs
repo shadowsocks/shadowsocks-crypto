@@ -20,11 +20,11 @@ impl Cipher {
         XChaCha20Poly1305::nonce_size()
     }
 
-    pub fn encrypt_packet(&mut self, salt: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
+    pub fn encrypt_packet(&self, salt: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
         self.cipher.encrypt(salt, plaintext_in_ciphertext_out);
     }
 
-    pub fn decrypt_packet(&mut self, salt: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
+    pub fn decrypt_packet(&self, salt: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
         self.cipher.decrypt(salt, ciphertext_in_plaintext_out)
     }
 }
