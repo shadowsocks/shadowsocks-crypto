@@ -8,34 +8,34 @@ mod aes_gcm;
 mod chacha20_poly1305;
 
 enum CipherVariant {
-    AesGcm(self::aes_gcm::Cipher),
-    ChaCha20Poly1305(self::chacha20_poly1305::Cipher),
+    AesGcm(AesGcmCipher),
+    ChaCha20Poly1305(ChaCha20Poly1305Cipher),
 }
 
 impl CipherVariant {
-    fn new(kind: CipherKind, key: &[u8], nonce: &[u8], session_id: u64) -> CipherVariant {
+    fn new(kind: CipherKind, key: &[u8], session_id: u64) -> CipherVariant {
         match kind {
             CipherKind::AEAD2022_BLAKE3_AES_128_GCM | CipherKind::AEAD2022_BLAKE3_AES_256_GCM => {
                 CipherVariant::AesGcm(AesGcmCipher::new(kind, key, session_id))
             }
             CipherKind::AEAD2022_BLAKE3_CHACHA20_POLY1305 => {
-                CipherVariant::ChaCha20Poly1305(ChaCha20Poly1305Cipher::new(key, nonce))
+                CipherVariant::ChaCha20Poly1305(ChaCha20Poly1305Cipher::new(key))
             }
             _ => unreachable!("Cipher {} is not an AEAD 2022 cipher", kind),
         }
     }
 
-    fn encrypt_packet(&mut self, plaintext_in_ciphertext_out: &mut [u8]) {
+    fn encrypt_packet(&mut self, salt: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
         match *self {
             CipherVariant::AesGcm(ref mut c) => c.encrypt_packet(plaintext_in_ciphertext_out),
-            CipherVariant::ChaCha20Poly1305(ref mut c) => c.encrypt_packet(plaintext_in_ciphertext_out),
+            CipherVariant::ChaCha20Poly1305(ref mut c) => c.encrypt_packet(salt, plaintext_in_ciphertext_out),
         }
     }
 
-    fn decrypt_packet(&mut self, ciphertext_in_plaintext_out: &mut [u8]) -> bool {
+    fn decrypt_packet(&mut self, salt: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
         match *self {
             CipherVariant::AesGcm(ref mut c) => c.decrypt_packet(ciphertext_in_plaintext_out),
-            CipherVariant::ChaCha20Poly1305(ref mut c) => c.decrypt_packet(ciphertext_in_plaintext_out),
+            CipherVariant::ChaCha20Poly1305(ref mut c) => c.decrypt_packet(salt, ciphertext_in_plaintext_out),
         }
     }
 }
@@ -48,9 +48,9 @@ pub struct UdpCipher {
 
 impl UdpCipher {
     /// Create a new AEAD2022 UDP Cipher
-    pub fn new(kind: CipherKind, key: &[u8], nonce: &[u8], session_id: u64) -> UdpCipher {
+    pub fn new(kind: CipherKind, key: &[u8], session_id: u64) -> UdpCipher {
         UdpCipher {
-            cipher: CipherVariant::new(kind, key, nonce, session_id),
+            cipher: CipherVariant::new(kind, key, session_id),
             kind,
         }
     }
@@ -68,12 +68,12 @@ impl UdpCipher {
     }
 
     /// Encrypt a UDP packet, including packet header
-    pub fn encrypt_packet(&mut self, plaintext_in_ciphertext_out: &mut [u8]) {
-        self.cipher.encrypt_packet(plaintext_in_ciphertext_out)
+    pub fn encrypt_packet(&mut self, salt: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
+        self.cipher.encrypt_packet(salt, plaintext_in_ciphertext_out)
     }
 
     /// Decrypt a UDP packet, including packet header
-    pub fn decrypt_packet(&mut self, ciphertext_in_plaintext_out: &mut [u8]) -> bool {
-        self.cipher.decrypt_packet(ciphertext_in_plaintext_out)
+    pub fn decrypt_packet(&mut self, salt: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
+        self.cipher.decrypt_packet(salt, ciphertext_in_plaintext_out)
     }
 }
