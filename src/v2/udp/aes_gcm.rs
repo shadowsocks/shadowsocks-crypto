@@ -49,8 +49,8 @@ impl Cipher {
 
     pub fn decrypt_packet(&self, salt: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
         match *self {
-            Cipher::Aes128Gcm(ref c) => c.decrypt(salt, plaintext_in_ciphertext_out),
-            Cipher::Aes256Gcm(ref c) => c.decrypt(salt, plaintext_in_ciphertext_out),
+            Cipher::Aes128Gcm(ref c) => c.decrypt(salt, ciphertext_in_plaintext_out),
+            Cipher::Aes256Gcm(ref c) => c.decrypt(salt, ciphertext_in_plaintext_out),
         }
     }
 }
