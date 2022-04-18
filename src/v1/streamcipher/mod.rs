@@ -1,6 +1,4 @@
-#![allow(dead_code)]
-
-use super::CipherKind;
+use crate::kind::{CipherCategory, CipherKind};
 
 mod cfb;
 mod chacha20;
@@ -13,34 +11,26 @@ mod table;
 
 pub use self::{cfb::*, chacha20::*, ctr::*, ofb::*, rc4::*, rc4_md5::*, table::*};
 
-trait StreamCipherExt {
-    fn sc_kind(&self) -> CipherKind;
-    fn sc_key_len(&self) -> usize;
-    fn sc_iv_len(&self) -> usize;
-    fn sc_encrypt_slice(&mut self, plaintext_in_ciphertext_out: &mut [u8]);
-    fn sc_decrypt_slice(&mut self, ciphertext_in_plaintext_out: &mut [u8]);
-}
-
 macro_rules! impl_cipher {
     ($name:tt, $kind:tt) => {
-        impl StreamCipherExt for $name {
-            fn sc_kind(&self) -> CipherKind {
+        impl $name {
+            fn kind(&self) -> CipherKind {
                 CipherKind::$kind
             }
 
-            fn sc_key_len(&self) -> usize {
-                self.sc_kind().key_len()
+            fn key_len(&self) -> usize {
+                self.kind().key_len()
             }
 
-            fn sc_iv_len(&self) -> usize {
-                self.sc_kind().iv_len()
+            fn iv_len(&self) -> usize {
+                self.kind().iv_len()
             }
 
-            fn sc_encrypt_slice(&mut self, plaintext_in_ciphertext_out: &mut [u8]) {
+            fn encrypt_slice(&mut self, plaintext_in_ciphertext_out: &mut [u8]) {
                 self.encryptor_update(plaintext_in_ciphertext_out);
             }
 
-            fn sc_decrypt_slice(&mut self, ciphertext_in_plaintext_out: &mut [u8]) {
+            fn decrypt_slice(&mut self, ciphertext_in_plaintext_out: &mut [u8]) {
                 self.decryptor_update(ciphertext_in_plaintext_out);
             }
         }
@@ -108,34 +98,34 @@ macro_rules! stream_cipher_variant {
             }
         }
 
-        impl StreamCipherExt for StreamCipherInner {
-            fn sc_kind(&self) -> CipherKind {
+        impl StreamCipherInner {
+            fn kind(&self) -> CipherKind {
                 match *self {
-                    $(StreamCipherInner::$name(ref c) => c.sc_kind(),)+
+                    $(StreamCipherInner::$name(ref c) => c.kind(),)+
                 }
             }
 
-            fn sc_key_len(&self) -> usize {
+            fn key_len(&self) -> usize {
                 match *self {
-                    $(StreamCipherInner::$name(ref c) => c.sc_key_len(),)+
+                    $(StreamCipherInner::$name(ref c) => c.key_len(),)+
                 }
             }
 
-            fn sc_iv_len(&self) -> usize {
+            fn iv_len(&self) -> usize {
                 match *self {
-                    $(StreamCipherInner::$name(ref c) => c.sc_iv_len(),)+
+                    $(StreamCipherInner::$name(ref c) => c.iv_len(),)+
                 }
             }
 
-            fn sc_encrypt_slice(&mut self, plaintext_in_ciphertext_out: &mut [u8]) {
+            fn encrypt_slice(&mut self, plaintext_in_ciphertext_out: &mut [u8]) {
                 match *self {
-                    $(StreamCipherInner::$name(ref mut c) => c.sc_encrypt_slice(plaintext_in_ciphertext_out),)+
+                    $(StreamCipherInner::$name(ref mut c) => c.encrypt_slice(plaintext_in_ciphertext_out),)+
                 }
             }
 
-            fn sc_decrypt_slice(&mut self, ciphertext_in_plaintext_out: &mut [u8]) {
+            fn decrypt_slice(&mut self, ciphertext_in_plaintext_out: &mut [u8]) {
                 match *self {
-                    $(StreamCipherInner::$name(ref mut c) => c.sc_decrypt_slice(ciphertext_in_plaintext_out),)+
+                    $(StreamCipherInner::$name(ref mut c) => c.decrypt_slice(ciphertext_in_plaintext_out),)+
                 }
             }
         }
@@ -202,22 +192,31 @@ impl StreamCipher {
     }
 
     pub fn kind(&self) -> CipherKind {
-        self.cipher.sc_kind()
+        self.cipher.kind()
+    }
+
+    pub fn category(&self) -> CipherCategory {
+        CipherCategory::Stream
     }
 
     pub fn key_len(&self) -> usize {
-        self.cipher.sc_key_len()
+        self.cipher.key_len()
+    }
+
+    pub fn tag_len(&self) -> usize {
+        0
     }
 
     pub fn iv_len(&self) -> usize {
-        self.cipher.sc_iv_len()
+        self.cipher.iv_len()
     }
 
     pub fn encrypt(&mut self, plaintext_in_ciphertext_out: &mut [u8]) {
-        self.cipher.sc_encrypt_slice(plaintext_in_ciphertext_out);
+        self.cipher.encrypt_slice(plaintext_in_ciphertext_out);
     }
 
-    pub fn decrypt(&mut self, ciphertext_in_plaintext_out: &mut [u8]) {
-        self.cipher.sc_decrypt_slice(ciphertext_in_plaintext_out);
+    pub fn decrypt(&mut self, ciphertext_in_plaintext_out: &mut [u8]) -> bool {
+        self.cipher.decrypt_slice(ciphertext_in_plaintext_out);
+        true
     }
 }

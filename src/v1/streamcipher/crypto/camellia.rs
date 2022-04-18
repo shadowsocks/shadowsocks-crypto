@@ -18,6 +18,9 @@
 //
 // Speci cationofCamellia|a128-bitBlockCipher
 // https://info.isl.ntt.co.jp/crypt/eng/camellia/dl/01espec.pdf
+
+#![allow(dead_code)]
+
 const BLOCK_LEN: usize = 16;
 const CAMELLIA_BLOCK_SIZE: usize = 16;
 const CAMELLIA_TABLE_BYTE_LEN: usize = 272;

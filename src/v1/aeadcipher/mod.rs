@@ -1,4 +1,4 @@
-use crate::v1::CipherKind;
+use crate::kind::{CipherCategory, CipherKind};
 
 #[cfg(feature = "v1-aead-extra")]
 mod aes_ccm;
@@ -150,6 +150,11 @@ impl AeadCipher {
     #[inline(always)]
     pub fn kind(&self) -> CipherKind {
         self.cipher.kind()
+    }
+
+    #[inline(always)]
+    pub fn category(&self) -> CipherCategory {
+        CipherCategory::Aead
     }
 
     #[inline(always)]

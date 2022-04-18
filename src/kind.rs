@@ -1,12 +1,12 @@
 //! Cipher Kind
 
 #[cfg(feature = "v1-aead-extra")]
-use super::aeadcipher::{Aes128Ccm, Aes128GcmSiv, Aes256Ccm, Aes256GcmSiv, XChaCha20Poly1305};
+use crate::v1::aeadcipher::{Aes128Ccm, Aes128GcmSiv, Aes256Ccm, Aes256GcmSiv, XChaCha20Poly1305};
 #[cfg(feature = "v1-aead")]
-use super::aeadcipher::{Aes128Gcm, Aes256Gcm, ChaCha20Poly1305};
+use crate::v1::aeadcipher::{Aes128Gcm, Aes256Gcm, ChaCha20Poly1305};
 
 #[cfg(feature = "v1-stream")]
-use super::streamcipher::{
+use crate::v1::streamcipher::{
     Aes128Cfb1,
     Aes128Cfb128,
     Aes128Cfb8,
@@ -45,6 +45,13 @@ use super::streamcipher::{
     Rc4Md5,
 };
 
+#[cfg(feature = "v2")]
+use crate::v2::crypto::{
+    Aes128Gcm as Aead2022Aes128Gcm,
+    Aes256Gcm as Aead2022Aes256Gcm,
+    ChaCha20Poly1305 as Aead2022ChaCha20Poly1305,
+};
+
 /// Category of ciphers
 #[derive(Clone, Debug, Copy, PartialEq, Eq)]
 pub enum CipherCategory {
@@ -58,6 +65,10 @@ pub enum CipherCategory {
     #[cfg(feature = "v1-aead")]
     #[cfg_attr(docrs, doc(cfg(feature = "v1-aead")))]
     Aead,
+    /// AEAD ciphers 2022 with enhanced security
+    #[cfg(feature = "v2")]
+    #[cfg_attr(docrs, doc(cfg(feature = "v2")))]
+    Aead2022,
 }
 
 /// ShadowSocks cipher type
@@ -216,6 +227,21 @@ pub enum CipherKind {
     #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
     /// AEAD_XCHACHA20_POLY1305
     XCHACHA20_POLY1305,
+
+    #[cfg(feature = "v2")]
+    #[cfg_attr(docrs, doc(cfg(feature = "v2")))]
+    /// 2022-blake3-aes-128-gcm
+    AEAD2022_BLAKE3_AES_128_GCM,
+
+    #[cfg(feature = "v2")]
+    #[cfg_attr(docrs, doc(cfg(feature = "v2")))]
+    /// 2022-blake3-aes-128-gcm
+    AEAD2022_BLAKE3_AES_256_GCM,
+
+    #[cfg(feature = "v2")]
+    #[cfg_attr(docrs, doc(cfg(feature = "v2")))]
+    /// 2022-blake3-chacha20-poly1305
+    AEAD2022_BLAKE3_CHACHA20_POLY1305,
 }
 
 impl CipherKind {
@@ -229,6 +255,11 @@ impl CipherKind {
         #[cfg(feature = "v1-aead")]
         if self.is_aead() {
             return CipherCategory::Aead;
+        }
+
+        #[cfg(feature = "v2")]
+        if self.is_aead_2022() {
+            return CipherCategory::Aead2022;
         }
 
         CipherCategory::None
@@ -267,6 +298,16 @@ impl CipherKind {
             #[cfg(feature = "v1-aead-extra")]
             AES_128_CCM | AES_256_CCM | AES_128_GCM_SIV | AES_256_GCM_SIV | XCHACHA20_POLY1305 => true,
 
+            _ => false,
+        }
+    }
+
+    #[cfg(feature = "v2")]
+    pub fn is_aead_2022(&self) -> bool {
+        use self::CipherKind::*;
+
+        match *self {
+            AEAD2022_BLAKE3_AES_128_GCM | AEAD2022_BLAKE3_AES_256_GCM | AEAD2022_BLAKE3_CHACHA20_POLY1305 => true,
             _ => false,
         }
     }
@@ -376,6 +417,13 @@ impl CipherKind {
 
             #[cfg(feature = "v1-aead-extra")]
             XCHACHA20_POLY1305 => XChaCha20Poly1305::key_size(),
+
+            #[cfg(feature = "v2")]
+            AEAD2022_BLAKE3_AES_128_GCM => Aead2022Aes128Gcm::key_size(),
+            #[cfg(feature = "v2")]
+            AEAD2022_BLAKE3_AES_256_GCM => Aead2022Aes256Gcm::key_size(),
+            #[cfg(feature = "v2")]
+            AEAD2022_BLAKE3_CHACHA20_POLY1305 => Aead2022ChaCha20Poly1305::key_size(),
         }
     }
 
@@ -434,7 +482,7 @@ impl CipherKind {
     }
 
     /// AEAD Cipher's TAG length
-    #[cfg(feature = "v1-aead")]
+    #[cfg(any(feature = "v1-aead", feature = "v2"))]
     pub fn tag_len(&self) -> usize {
         use self::CipherKind::*;
 
@@ -457,18 +505,45 @@ impl CipherKind {
             #[cfg(feature = "v1-aead-extra")]
             XCHACHA20_POLY1305 => XChaCha20Poly1305::tag_size(),
 
+            #[cfg(feature = "v2")]
+            AEAD2022_BLAKE3_AES_128_GCM => Aead2022Aes128Gcm::tag_size(),
+            #[cfg(feature = "v2")]
+            AEAD2022_BLAKE3_AES_256_GCM => Aead2022Aes256Gcm::tag_size(),
+            #[cfg(feature = "v2")]
+            AEAD2022_BLAKE3_CHACHA20_POLY1305 => Aead2022ChaCha20Poly1305::tag_size(),
+
             _ => panic!("only support AEAD ciphers"),
         }
     }
 
     /// AEAD Cipher's SALT length
-    #[cfg(feature = "v1-aead")]
+    #[cfg(any(feature = "v1-aead", feature = "v2"))]
     pub fn salt_len(&self) -> usize {
-        if !self.is_aead() {
-            panic!("only support AEAD ciphers");
+        #[cfg(feature = "v1-aead")]
+        if self.is_aead() {
+            return self.key_len();
         }
 
-        self.key_len()
+        #[cfg(feature = "v2")]
+        if self.is_aead_2022() {
+            return self.key_len();
+        }
+
+        panic!("only support AEAD ciphers");
+    }
+
+    /// AEAD Cipher's nonce length
+    #[cfg(feature = "v2")]
+    pub fn nonce_len(&self) -> usize {
+        use crate::v2::udp::{AesGcmCipher, ChaCha20Poly1305Cipher};
+
+        match *self {
+            CipherKind::AEAD2022_BLAKE3_AES_128_GCM | CipherKind::AEAD2022_BLAKE3_AES_256_GCM => {
+                AesGcmCipher::nonce_size()
+            }
+            CipherKind::AEAD2022_BLAKE3_CHACHA20_POLY1305 => ChaCha20Poly1305Cipher::nonce_size(),
+            _ => panic!("only support AEAD 2022 ciphers"),
+        }
     }
 }
 
@@ -577,6 +652,13 @@ impl core::fmt::Display for CipherKind {
 
             #[cfg(feature = "v1-aead-extra")]
             CipherKind::XCHACHA20_POLY1305 => "xchacha20-ietf-poly1305",
+
+            #[cfg(feature = "v2")]
+            CipherKind::AEAD2022_BLAKE3_AES_128_GCM => "2022-blake3-aes-128-gcm",
+            #[cfg(feature = "v2")]
+            CipherKind::AEAD2022_BLAKE3_AES_256_GCM => "2022-blake3-aes-256-gcm",
+            #[cfg(feature = "v2")]
+            CipherKind::AEAD2022_BLAKE3_CHACHA20_POLY1305 => "2022-blake3-chacha20-poly1305",
         })
     }
 }
@@ -713,6 +795,13 @@ impl core::str::FromStr for CipherKind {
 
             #[cfg(feature = "v1-aead-extra")]
             "xchacha20-ietf-poly1305" => Ok(XCHACHA20_POLY1305),
+
+            #[cfg(feature = "v2")]
+            "2022-blake3-aes-128-gcm" => Ok(AEAD2022_BLAKE3_AES_128_GCM),
+            #[cfg(feature = "v2")]
+            "2022-blake3-aes-256-gcm" => Ok(AEAD2022_BLAKE3_AES_256_GCM),
+            #[cfg(feature = "v2")]
+            "2022-blake3-chacha20-poly1305" => Ok(AEAD2022_BLAKE3_CHACHA20_POLY1305),
 
             _ => Err(ParseCipherKindError),
         }

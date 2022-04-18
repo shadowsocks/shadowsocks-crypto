@@ -16,7 +16,7 @@ macro_rules! impl_block_cipher_with_ofb_mode {
         }
 
         impl $name {
-            pub const B: usize = Self::BLOCK_LEN * 8;
+            // pub const B: usize = Self::BLOCK_LEN * 8;
             pub const BLOCK_LEN: usize = $cipher::BLOCK_LEN;
             pub const IV_LEN: usize = $cipher::BLOCK_LEN;
             pub const KEY_LEN: usize = $cipher::KEY_LEN;

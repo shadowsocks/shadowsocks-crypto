@@ -1,120 +1,10 @@
+use crate::kind::{CipherCategory, CipherKind};
+
 #[cfg(feature = "v1-aead")]
 use super::aeadcipher::AeadCipher;
+use super::dummy::DummyCipher;
 #[cfg(feature = "v1-stream")]
 use super::streamcipher::StreamCipher;
-use super::{dummy::DummyCipher, CipherCategory, CipherKind};
-
-/// Get available ciphers in string representation
-///
-/// Commonly used for checking users' configuration input
-pub const fn available_ciphers() -> &'static [&'static str] {
-    &[
-        "plain",
-        "none",
-        #[cfg(feature = "v1-stream")]
-        "table",
-        #[cfg(feature = "v1-stream")]
-        "rc4-md5",
-        // Stream Ciphers
-        #[cfg(feature = "v1-stream")]
-        "aes-128-ctr",
-        #[cfg(feature = "v1-stream")]
-        "aes-192-ctr",
-        #[cfg(feature = "v1-stream")]
-        "aes-256-ctr",
-        #[cfg(feature = "v1-stream")]
-        "aes-128-cfb",
-        #[cfg(feature = "v1-stream")]
-        "aes-128-cfb1",
-        #[cfg(feature = "v1-stream")]
-        "aes-128-cfb8",
-        #[cfg(feature = "v1-stream")]
-        "aes-128-cfb128",
-        #[cfg(feature = "v1-stream")]
-        "aes-192-cfb",
-        #[cfg(feature = "v1-stream")]
-        "aes-192-cfb1",
-        #[cfg(feature = "v1-stream")]
-        "aes-192-cfb8",
-        #[cfg(feature = "v1-stream")]
-        "aes-192-cfb128",
-        #[cfg(feature = "v1-stream")]
-        "aes-256-cfb",
-        #[cfg(feature = "v1-stream")]
-        "aes-256-cfb1",
-        #[cfg(feature = "v1-stream")]
-        "aes-256-cfb8",
-        #[cfg(feature = "v1-stream")]
-        "aes-256-cfb128",
-        #[cfg(feature = "v1-stream")]
-        "aes-128-ofb",
-        #[cfg(feature = "v1-stream")]
-        "aes-192-ofb",
-        #[cfg(feature = "v1-stream")]
-        "aes-256-ofb",
-        #[cfg(feature = "v1-stream")]
-        "camellia-128-ctr",
-        #[cfg(feature = "v1-stream")]
-        "camellia-192-ctr",
-        #[cfg(feature = "v1-stream")]
-        "camellia-256-ctr",
-        #[cfg(feature = "v1-stream")]
-        "camellia-128-cfb",
-        #[cfg(feature = "v1-stream")]
-        "camellia-128-cfb1",
-        #[cfg(feature = "v1-stream")]
-        "camellia-128-cfb8",
-        #[cfg(feature = "v1-stream")]
-        "camellia-128-cfb128",
-        #[cfg(feature = "v1-stream")]
-        "camellia-192-cfb",
-        #[cfg(feature = "v1-stream")]
-        "camellia-192-cfb1",
-        #[cfg(feature = "v1-stream")]
-        "camellia-192-cfb8",
-        #[cfg(feature = "v1-stream")]
-        "camellia-192-cfb128",
-        #[cfg(feature = "v1-stream")]
-        "camellia-256-cfb",
-        #[cfg(feature = "v1-stream")]
-        "camellia-256-cfb1",
-        #[cfg(feature = "v1-stream")]
-        "camellia-256-cfb8",
-        #[cfg(feature = "v1-stream")]
-        "camellia-256-cfb128",
-        #[cfg(feature = "v1-stream")]
-        "camellia-128-ofb",
-        #[cfg(feature = "v1-stream")]
-        "camellia-192-ofb",
-        #[cfg(feature = "v1-stream")]
-        "camellia-256-ofb",
-        #[cfg(feature = "v1-stream")]
-        "rc4",
-        #[cfg(feature = "v1-stream")]
-        "chacha20-ietf",
-        // AEAD Ciphers
-        #[cfg(feature = "v1-aead")]
-        "aes-128-gcm",
-        #[cfg(feature = "v1-aead")]
-        "aes-256-gcm",
-        #[cfg(feature = "v1-aead")]
-        "chacha20-ietf-poly1305",
-        #[cfg(feature = "v1-aead-extra")]
-        "aes-128-ccm",
-        #[cfg(feature = "v1-aead-extra")]
-        "aes-256-ccm",
-        #[cfg(feature = "v1-aead-extra")]
-        "aes-128-gcm-siv",
-        #[cfg(feature = "v1-aead-extra")]
-        "aes-256-gcm-siv",
-        #[cfg(feature = "v1-aead-extra")]
-        "xchacha20-ietf-poly1305",
-        // #[cfg(feature = "v1-aead-extra")]
-        // "sm4-gcm",
-        // #[cfg(feature = "v1-aead-extra")]
-        // "sm4-ccm",
-    ]
-}
 
 /// Generate random bytes into `iv_or_salt`
 pub fn random_iv_or_salt(iv_or_salt: &mut [u8]) {
@@ -164,81 +54,6 @@ pub fn openssl_bytes_to_key(password: &[u8], key: &mut [u8]) {
 
         offset += amt;
         last_digest = Some(digest);
-    }
-}
-
-trait CipherInner {
-    fn ss_kind(&self) -> CipherKind;
-    fn ss_category(&self) -> CipherCategory;
-    fn ss_tag_len(&self) -> usize;
-    fn ss_encrypt_slice(&mut self, plaintext_in_ciphertext_out: &mut [u8]);
-    fn ss_decrypt_slice(&mut self, ciphertext_in_plaintext_out: &mut [u8]) -> bool;
-}
-
-impl CipherInner for DummyCipher {
-    fn ss_kind(&self) -> CipherKind {
-        CipherKind::NONE
-    }
-
-    fn ss_category(&self) -> CipherCategory {
-        CipherCategory::None
-    }
-
-    fn ss_tag_len(&self) -> usize {
-        0
-    }
-
-    fn ss_encrypt_slice(&mut self, _plaintext_in_ciphertext_out: &mut [u8]) {}
-
-    fn ss_decrypt_slice(&mut self, _ciphertext_in_plaintext_out: &mut [u8]) -> bool {
-        true
-    }
-}
-
-#[cfg(feature = "v1-stream")]
-impl CipherInner for StreamCipher {
-    fn ss_kind(&self) -> CipherKind {
-        self.kind()
-    }
-
-    fn ss_category(&self) -> CipherCategory {
-        CipherCategory::Stream
-    }
-
-    fn ss_tag_len(&self) -> usize {
-        0
-    }
-
-    fn ss_encrypt_slice(&mut self, plaintext_in_ciphertext_out: &mut [u8]) {
-        self.encrypt(plaintext_in_ciphertext_out)
-    }
-
-    fn ss_decrypt_slice(&mut self, ciphertext_in_plaintext_out: &mut [u8]) -> bool {
-        self.decrypt(ciphertext_in_plaintext_out);
-        true
-    }
-}
-
-#[cfg(feature = "v1-aead")]
-impl CipherInner for AeadCipher {
-    fn ss_kind(&self) -> CipherKind {
-        self.kind()
-    }
-
-    fn ss_category(&self) -> CipherCategory {
-        CipherCategory::Aead
-    }
-
-    fn ss_tag_len(&self) -> usize {
-        self.tag_len()
-    }
-
-    fn ss_encrypt_slice(&mut self, plaintext_in_ciphertext_out: &mut [u8]) {
-        self.encrypt(plaintext_in_ciphertext_out)
-    }
-
-    fn ss_decrypt_slice(&mut self, ciphertext_in_plaintext_out: &mut [u8]) -> bool {
-        self.decrypt(ciphertext_in_plaintext_out)
     }
 }
 
@@ -333,22 +148,24 @@ impl Cipher {
                 let subkey = &okm[..ikm.len()];
                 Cipher::Aead(AeadCipher::new(kind, subkey))
             }
+            #[allow(unreachable_patterns)]
+            _ => unimplemented!("Category {:?} is not v1 protocol", category),
         }
     }
 
     /// Get the `CipherCategory` of the current cipher
     pub fn category(&self) -> CipherCategory {
-        cipher_method_forward!(ref self, ss_category)
+        cipher_method_forward!(ref self, category)
     }
 
     /// Get the `CipherKind` of the current cipher
     pub fn kind(&self) -> CipherKind {
-        cipher_method_forward!(ref self, ss_kind)
+        cipher_method_forward!(ref self, kind)
     }
 
     /// Get the TAG length of AEAD ciphers
     pub fn tag_len(&self) -> usize {
-        cipher_method_forward!(ref self, ss_tag_len)
+        cipher_method_forward!(ref self, tag_len)
     }
 
     /// Encrypt a packet. Encrypted result will be written in `pkt`
@@ -356,7 +173,7 @@ impl Cipher {
     /// - Stream Ciphers: the size of input and output packets are the same
     /// - AEAD Ciphers: the size of output must be at least `input.len() + TAG_LEN`
     pub fn encrypt_packet(&mut self, pkt: &mut [u8]) {
-        cipher_method_forward!(mut self, ss_encrypt_slice, pkt)
+        cipher_method_forward!(mut self, encrypt, pkt)
     }
 
     /// Decrypt a packet. Decrypted result will be written in `pkt`
@@ -365,7 +182,7 @@ impl Cipher {
     /// - AEAD Ciphers: the size of output is `input.len() - TAG_LEN`
     #[must_use]
     pub fn decrypt_packet(&mut self, pkt: &mut [u8]) -> bool {
-        cipher_method_forward!(mut self, ss_decrypt_slice, pkt)
+        cipher_method_forward!(mut self, decrypt, pkt)
     }
 }
 
