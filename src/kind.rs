@@ -547,6 +547,8 @@ impl CipherKind {
     /// AEAD Cipher's nonce length
     #[cfg(feature = "v2")]
     pub fn nonce_len(&self) -> usize {
+        #[cfg(feature = "v2-extra")]
+        use crate::v2::udp::ChaCha8Poly1305Cipher;
         use crate::v2::udp::{AesGcmCipher, ChaCha20Poly1305Cipher};
 
         match *self {
@@ -554,6 +556,8 @@ impl CipherKind {
                 AesGcmCipher::nonce_size()
             }
             CipherKind::AEAD2022_BLAKE3_CHACHA20_POLY1305 => ChaCha20Poly1305Cipher::nonce_size(),
+            #[cfg(feature = "v2-extra")]
+            CipherKind::AEAD2022_BLAKE3_CHACHA8_POLY1305 => ChaCha8Poly1305Cipher::nonce_size(),
             _ => panic!("only support AEAD 2022 ciphers"),
         }
     }
