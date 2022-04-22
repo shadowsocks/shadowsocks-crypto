@@ -2,14 +2,20 @@
 
 use crate::{CipherCategory, CipherKind};
 
+#[cfg(feature = "v2-extra")]
+pub use self::chacha8_poly1305::Cipher as ChaCha8Poly1305Cipher;
 pub use self::{aes_gcm::Cipher as AesGcmCipher, chacha20_poly1305::Cipher as ChaCha20Poly1305Cipher};
 
 mod aes_gcm;
 mod chacha20_poly1305;
+#[cfg(feature = "v2-extra")]
+mod chacha8_poly1305;
 
 enum CipherVariant {
     AesGcm(AesGcmCipher),
     ChaCha20Poly1305(ChaCha20Poly1305Cipher),
+    #[cfg(feature = "v2-extra")]
+    ChaCha8Poly1305(ChaCha8Poly1305Cipher),
 }
 
 impl CipherVariant {
@@ -21,6 +27,10 @@ impl CipherVariant {
             CipherKind::AEAD2022_BLAKE3_CHACHA20_POLY1305 => {
                 CipherVariant::ChaCha20Poly1305(ChaCha20Poly1305Cipher::new(key))
             }
+            #[cfg(feature = "v2-extra")]
+            CipherKind::AEAD2022_BLAKE3_CHACHA8_POLY1305 => {
+                CipherVariant::ChaCha8Poly1305(ChaCha8Poly1305Cipher::new(key))
+            }
             _ => unreachable!("Cipher {} is not an AEAD 2022 cipher", kind),
         }
     }
@@ -29,6 +39,8 @@ impl CipherVariant {
         match *self {
             CipherVariant::AesGcm(ref c) => c.encrypt_packet(salt, plaintext_in_ciphertext_out),
             CipherVariant::ChaCha20Poly1305(ref c) => c.encrypt_packet(salt, plaintext_in_ciphertext_out),
+            #[cfg(feature = "v2-extra")]
+            CipherVariant::ChaCha8Poly1305(ref c) => c.encrypt_packet(salt, plaintext_in_ciphertext_out),
         }
     }
 
@@ -36,6 +48,8 @@ impl CipherVariant {
         match *self {
             CipherVariant::AesGcm(ref c) => c.decrypt_packet(salt, ciphertext_in_plaintext_out),
             CipherVariant::ChaCha20Poly1305(ref c) => c.decrypt_packet(salt, ciphertext_in_plaintext_out),
+            #[cfg(feature = "v2-extra")]
+            CipherVariant::ChaCha8Poly1305(ref c) => c.decrypt_packet(salt, ciphertext_in_plaintext_out),
         }
     }
 }

@@ -1,21 +1,21 @@
-//! AEAD 2022 UDP chacha20-poly1305 Ciphers
+//! AEAD 2022 UDP chacha8-poly1305 Ciphers
 
-use crate::v2::crypto::XChaCha20Poly1305;
+use crate::v2::crypto::XChaCha8Poly1305;
 
 pub struct Cipher {
-    cipher: XChaCha20Poly1305,
+    cipher: XChaCha8Poly1305,
 }
 
 impl Cipher {
     pub fn new(key: &[u8]) -> Cipher {
-        debug_assert_eq!(key.len(), XChaCha20Poly1305::key_size());
+        debug_assert_eq!(key.len(), XChaCha8Poly1305::key_size());
         Cipher {
-            cipher: XChaCha20Poly1305::new(key),
+            cipher: XChaCha8Poly1305::new(key),
         }
     }
 
     pub fn nonce_size() -> usize {
-        XChaCha20Poly1305::nonce_size()
+        XChaCha8Poly1305::nonce_size()
     }
 
     pub fn encrypt_packet(&self, salt: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {

@@ -20,6 +20,7 @@ v1-stream = ["v1", "chacha20", "aes"]
 v1-aead = ["v1", "aes-gcm", "chacha20poly1305", "hkdf", "sha1"]
 v1-aead-extra = ["v1-aead", "aes-gcm-siv", "ccm", "aes"]
 v2 = ["aes", "aes-gcm", "blake3", "chacha20poly1305", "bytes"]
+v2-extra = ["v2", "chacha20poly1305/reduced-round"]
 
 ring = ["ring-compat"]
 armv8 = ["aes-gcm/armv8", "aes/armv8", "aes-gcm-siv/armv8"]

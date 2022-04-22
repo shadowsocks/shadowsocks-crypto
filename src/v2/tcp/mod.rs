@@ -1,5 +1,7 @@
 //! AEAD 2022 TCP Ciphers
 
+#[cfg(feature = "v2-extra")]
+use crate::v2::crypto::chacha8_poly1305::ChaCha8Poly1305;
 use crate::{
     kind::{CipherCategory, CipherKind},
     v2::{
@@ -15,6 +17,8 @@ enum CipherVariant {
     Aes128Gcm(Aes128Gcm),
     Aes256Gcm(Aes256Gcm),
     ChaCha20Poly1305(ChaCha20Poly1305),
+    #[cfg(feature = "v2-extra")]
+    ChaCha8Poly1305(ChaCha8Poly1305),
 }
 
 impl CipherVariant {
@@ -25,7 +29,9 @@ impl CipherVariant {
             CipherKind::AEAD2022_BLAKE3_CHACHA20_POLY1305 => {
                 CipherVariant::ChaCha20Poly1305(ChaCha20Poly1305::new(key))
             }
-            _ => unreachable!("{:?} is not an AEAD cipher", kind),
+            #[cfg(feature = "v2-extra")]
+            CipherKind::AEAD2022_BLAKE3_CHACHA8_POLY1305 => CipherVariant::ChaCha8Poly1305(ChaCha8Poly1305::new(key)),
+            _ => unreachable!("{:?} is not an AEAD-2022 cipher", kind),
         }
     }
 
@@ -34,6 +40,8 @@ impl CipherVariant {
             CipherVariant::Aes128Gcm(..) => Aes128Gcm::nonce_size(),
             CipherVariant::Aes256Gcm(..) => Aes256Gcm::nonce_size(),
             CipherVariant::ChaCha20Poly1305(..) => ChaCha20Poly1305::nonce_size(),
+            #[cfg(feature = "v2-extra")]
+            CipherVariant::ChaCha8Poly1305(..) => ChaCha8Poly1305::nonce_size(),
         }
     }
 
@@ -42,6 +50,8 @@ impl CipherVariant {
             CipherVariant::Aes128Gcm(..) => CipherKind::AEAD2022_BLAKE3_AES_128_GCM,
             CipherVariant::Aes256Gcm(..) => CipherKind::AEAD2022_BLAKE3_AES_256_GCM,
             CipherVariant::ChaCha20Poly1305(..) => CipherKind::AEAD2022_BLAKE3_CHACHA20_POLY1305,
+            #[cfg(feature = "v2-extra")]
+            CipherVariant::ChaCha8Poly1305(..) => CipherKind::AEAD2022_BLAKE3_CHACHA8_POLY1305,
         }
     }
 
@@ -50,6 +60,8 @@ impl CipherVariant {
             CipherVariant::Aes128Gcm(ref mut c) => c.encrypt(nonce, plaintext_in_ciphertext_out),
             CipherVariant::Aes256Gcm(ref mut c) => c.encrypt(nonce, plaintext_in_ciphertext_out),
             CipherVariant::ChaCha20Poly1305(ref mut c) => c.encrypt(nonce, plaintext_in_ciphertext_out),
+            #[cfg(feature = "v2-extra")]
+            CipherVariant::ChaCha8Poly1305(ref mut c) => c.encrypt(nonce, plaintext_in_ciphertext_out),
         }
     }
 
@@ -58,6 +70,8 @@ impl CipherVariant {
             CipherVariant::Aes128Gcm(ref mut c) => c.decrypt(nonce, ciphertext_in_plaintext_out),
             CipherVariant::Aes256Gcm(ref mut c) => c.decrypt(nonce, ciphertext_in_plaintext_out),
             CipherVariant::ChaCha20Poly1305(ref mut c) => c.decrypt(nonce, ciphertext_in_plaintext_out),
+            #[cfg(feature = "v2-extra")]
+            CipherVariant::ChaCha8Poly1305(ref mut c) => c.decrypt(nonce, ciphertext_in_plaintext_out),
         }
     }
 }

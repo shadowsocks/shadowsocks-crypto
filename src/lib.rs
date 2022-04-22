@@ -130,5 +130,7 @@ pub const fn available_ciphers() -> &'static [&'static str] {
         "2022-blake3-aes-256-gcm",
         #[cfg(feature = "v2")]
         "2022-blake3-chacha20-poly1305",
+        #[cfg(feature = "v2-extra")]
+        "2022-blake3-chacha8-poly1305",
     ]
 }

@@ -45,6 +45,8 @@ use crate::v1::streamcipher::{
     Rc4Md5,
 };
 
+#[cfg(feature = "v2-extra")]
+use crate::v2::crypto::ChaCha8Poly1305 as Aead2022ChaCha8Poly1305;
 #[cfg(feature = "v2")]
 use crate::v2::crypto::{
     Aes128Gcm as Aead2022Aes128Gcm,
@@ -242,6 +244,10 @@ pub enum CipherKind {
     #[cfg_attr(docrs, doc(cfg(feature = "v2")))]
     /// 2022-blake3-chacha20-poly1305
     AEAD2022_BLAKE3_CHACHA20_POLY1305,
+    #[cfg(feature = "v2-extra")]
+    #[cfg_attr(docrs, doc(cfg(feature = "v2-extra")))]
+    /// 2022-blake3-chacha8-poly1305
+    AEAD2022_BLAKE3_CHACHA8_POLY1305,
 }
 
 impl CipherKind {
@@ -308,6 +314,8 @@ impl CipherKind {
 
         match *self {
             AEAD2022_BLAKE3_AES_128_GCM | AEAD2022_BLAKE3_AES_256_GCM | AEAD2022_BLAKE3_CHACHA20_POLY1305 => true,
+            #[cfg(feature = "v2-extra")]
+            AEAD2022_BLAKE3_CHACHA8_POLY1305 => true,
             _ => false,
         }
     }
@@ -424,6 +432,8 @@ impl CipherKind {
             AEAD2022_BLAKE3_AES_256_GCM => Aead2022Aes256Gcm::key_size(),
             #[cfg(feature = "v2")]
             AEAD2022_BLAKE3_CHACHA20_POLY1305 => Aead2022ChaCha20Poly1305::key_size(),
+            #[cfg(feature = "v2-extra")]
+            AEAD2022_BLAKE3_CHACHA8_POLY1305 => Aead2022ChaCha8Poly1305::key_size(),
         }
     }
 
@@ -511,6 +521,8 @@ impl CipherKind {
             AEAD2022_BLAKE3_AES_256_GCM => Aead2022Aes256Gcm::tag_size(),
             #[cfg(feature = "v2")]
             AEAD2022_BLAKE3_CHACHA20_POLY1305 => Aead2022ChaCha20Poly1305::tag_size(),
+            #[cfg(feature = "v2-extra")]
+            AEAD2022_BLAKE3_CHACHA8_POLY1305 => Aead2022ChaCha8Poly1305::tag_size(),
 
             _ => panic!("only support AEAD ciphers"),
         }
@@ -659,6 +671,8 @@ impl core::fmt::Display for CipherKind {
             CipherKind::AEAD2022_BLAKE3_AES_256_GCM => "2022-blake3-aes-256-gcm",
             #[cfg(feature = "v2")]
             CipherKind::AEAD2022_BLAKE3_CHACHA20_POLY1305 => "2022-blake3-chacha20-poly1305",
+            #[cfg(feature = "v2-extra")]
+            CipherKind::AEAD2022_BLAKE3_CHACHA8_POLY1305 => "2022-blake3-chacha8-poly1305",
         })
     }
 }
@@ -802,6 +816,8 @@ impl core::str::FromStr for CipherKind {
             "2022-blake3-aes-256-gcm" => Ok(AEAD2022_BLAKE3_AES_256_GCM),
             #[cfg(feature = "v2")]
             "2022-blake3-chacha20-poly1305" => Ok(AEAD2022_BLAKE3_CHACHA20_POLY1305),
+            #[cfg(feature = "v2-extra")]
+            "2022-blake3-chacha8-poly1305" => Ok(AEAD2022_BLAKE3_CHACHA8_POLY1305),
 
             _ => Err(ParseCipherKindError),
         }
