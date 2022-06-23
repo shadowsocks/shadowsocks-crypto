@@ -42,12 +42,12 @@ chacha20 = { version = "0.8.1", optional = true }
 aes = { version = "0.7.5", features = ["ctr"], optional = true }
 bytes = { version = "1.1", optional = true }
 
-[target.'cfg(all(unix, any(target_arch = "x86", target_arch = "x86_64")))'.dependencies]
-md-5 = { version = "0.10", features = ["asm"] }
-sha1 = { version = "0.10", features = ["asm"], optional = true }
+#[target.'cfg(all(unix, any(target_arch = "x86", target_arch = "x86_64")))'.dependencies]
+#md-5 = { version = "0.10", features = ["asm"] }
+#sha1 = { version = "0.10", features = ["asm"], optional = true }
 
-[target.'cfg(all(unix, target_arch = "aarch64", any(target_os = "linux", target_os = "macos")))'.dependencies]
-sha1 = { version = "0.10", features = ["asm"], optional = true }
+#[target.'cfg(all(unix, target_arch = "aarch64", any(target_os = "linux", target_os = "macos")))'.dependencies]
+#sha1 = { version = "0.10", features = ["asm"], optional = true }
 
 #[target.'cfg(all(windows, any(target_arch = "x86", target_arch = "x86_64"), target_env = "gnu"))'.dependencies]
 #md-5 = { version = "0.10", features = ["asm"] }
