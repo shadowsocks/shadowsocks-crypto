@@ -6,11 +6,11 @@ cfg_if! {
 
         pub use ring_compat::aead::{Aes128Gcm as CryptoAes128Gcm, Aes256Gcm as CryptoAes256Gcm};
         use ring_compat::{
-            aead::{AeadCore, AeadInPlace, Buffer, Error as AeadError, NewAead},
+            aead::{AeadCore, AeadInPlace, Buffer, Error as AeadError, KeySizeUser, KeyInit},
             generic_array::{typenum::Unsigned, GenericArray},
         };
 
-        type Key<KeySize> = GenericArray<u8, KeySize>;
+        type Key<B> = GenericArray<u8, <B as KeySizeUser>::KeySize>;
         type Nonce<NonceSize> = GenericArray<u8, NonceSize>;
 
         struct SliceBuffer<'a>(&'a mut [u8]);
@@ -36,7 +36,7 @@ cfg_if! {
         }
     } else {
         use aes_gcm::{
-            aead::{generic_array::typenum::Unsigned, AeadCore, AeadInPlace, NewAead},
+            aead::{generic_array::typenum::Unsigned, AeadCore, AeadInPlace, KeySizeUser, KeyInit},
             Key,
             Nonce,
             Tag,
@@ -49,12 +49,12 @@ pub struct Aes128Gcm(CryptoAes128Gcm);
 
 impl Aes128Gcm {
     pub fn new(key: &[u8]) -> Aes128Gcm {
-        let key = Key::from_slice(key);
+        let key = Key::<CryptoAes128Gcm>::from_slice(key);
         Aes128Gcm(CryptoAes128Gcm::new(key))
     }
 
     pub fn key_size() -> usize {
-        <CryptoAes128Gcm as NewAead>::KeySize::to_usize()
+        <CryptoAes128Gcm as KeySizeUser>::KeySize::to_usize()
     }
 
     pub fn nonce_size() -> usize {
@@ -100,12 +100,12 @@ pub struct Aes256Gcm(CryptoAes256Gcm);
 
 impl Aes256Gcm {
     pub fn new(key: &[u8]) -> Aes256Gcm {
-        let key = Key::from_slice(key);
+        let key = Key::<CryptoAes256Gcm>::from_slice(key);
         Aes256Gcm(CryptoAes256Gcm::new(key))
     }
 
     pub fn key_size() -> usize {
-        <CryptoAes256Gcm as NewAead>::KeySize::to_usize()
+        <CryptoAes256Gcm as KeySizeUser>::KeySize::to_usize()
     }
 
     pub fn nonce_size() -> usize {

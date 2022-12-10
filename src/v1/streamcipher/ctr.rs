@@ -2,29 +2,32 @@
 // https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf
 
 use aes::{
-    cipher::{generic_array::GenericArray, FromBlockCipher, NewBlockCipher, StreamCipher},
+    cipher::{Iv, IvSizeUser, Key, KeyIvInit, StreamCipher, Unsigned},
     Aes128 as CryptoAes128,
-    Aes128Ctr as CryptoAes128Ctr,
     Aes192 as CryptoAes192,
-    Aes192Ctr as CryptoAes192Ctr,
     Aes256 as CryptoAes256,
-    Aes256Ctr as CryptoAes256Ctr,
 };
+use ctr::Ctr64BE;
 
 use super::crypto::{
     aes::{Aes128, Aes192, Aes256},
     camellia::{Camellia128, Camellia192, Camellia256},
 };
 
+type CryptoAes128Ctr = Ctr64BE<CryptoAes128>;
+type CryptoAes192Ctr = Ctr64BE<CryptoAes192>;
+type CryptoAes256Ctr = Ctr64BE<CryptoAes256>;
+
 pub struct Aes128Ctr(CryptoAes128Ctr);
 
 impl Aes128Ctr {
-    pub const IV_LEN: usize = aes::BLOCK_SIZE;
+    pub const IV_LEN: usize = <CryptoAes128Ctr as IvSizeUser>::IvSize::USIZE;
     pub const KEY_LEN: usize = Aes128::KEY_LEN;
 
     pub fn new(key: &[u8], iv: &[u8]) -> Aes128Ctr {
-        let cipher = CryptoAes128::new_from_slice(key).expect("Aes128");
-        let ctr = CryptoAes128Ctr::from_block_cipher(cipher, GenericArray::from_slice(iv));
+        let key = Key::<CryptoAes128Ctr>::from_slice(key);
+        let iv = Iv::<CryptoAes128Ctr>::from_slice(iv);
+        let ctr = CryptoAes128Ctr::new(key, iv);
         Aes128Ctr(ctr)
     }
 
@@ -40,12 +43,13 @@ impl Aes128Ctr {
 pub struct Aes192Ctr(CryptoAes192Ctr);
 
 impl Aes192Ctr {
-    pub const IV_LEN: usize = aes::BLOCK_SIZE;
+    pub const IV_LEN: usize = <CryptoAes192Ctr as IvSizeUser>::IvSize::USIZE;
     pub const KEY_LEN: usize = Aes192::KEY_LEN;
 
     pub fn new(key: &[u8], iv: &[u8]) -> Aes192Ctr {
-        let cipher = CryptoAes192::new_from_slice(key).expect("Aes192");
-        let ctr = CryptoAes192Ctr::from_block_cipher(cipher, GenericArray::from_slice(iv));
+        let key = Key::<CryptoAes192Ctr>::from_slice(key);
+        let iv = Iv::<CryptoAes192Ctr>::from_slice(iv);
+        let ctr = CryptoAes192Ctr::new(key, iv);
         Aes192Ctr(ctr)
     }
 
@@ -61,12 +65,13 @@ impl Aes192Ctr {
 pub struct Aes256Ctr(CryptoAes256Ctr);
 
 impl Aes256Ctr {
-    pub const IV_LEN: usize = aes::BLOCK_SIZE;
+    pub const IV_LEN: usize = <CryptoAes256Ctr as IvSizeUser>::IvSize::USIZE;
     pub const KEY_LEN: usize = Aes256::KEY_LEN;
 
     pub fn new(key: &[u8], iv: &[u8]) -> Aes256Ctr {
-        let cipher = CryptoAes256::new_from_slice(key).expect("Aes256");
-        let ctr = CryptoAes256Ctr::from_block_cipher(cipher, GenericArray::from_slice(iv));
+        let key = Key::<CryptoAes256Ctr>::from_slice(key);
+        let iv = Iv::<CryptoAes256Ctr>::from_slice(iv);
+        let ctr = CryptoAes256Ctr::new(key, iv);
         Aes256Ctr(ctr)
     }
 

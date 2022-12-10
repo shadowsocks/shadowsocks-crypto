@@ -1,5 +1,5 @@
 use aes_gcm_siv::{
-    aead::{generic_array::typenum::Unsigned, AeadCore, AeadInPlace, NewAead},
+    aead::{generic_array::typenum::Unsigned, AeadCore, AeadInPlace, KeyInit, KeySizeUser},
     Aes128GcmSiv as CryptoAes128GcmSiv,
     Aes256GcmSiv as CryptoAes256GcmSiv,
     Key,
@@ -11,12 +11,12 @@ pub struct Aes128GcmSiv(CryptoAes128GcmSiv);
 
 impl Aes128GcmSiv {
     pub fn new(key: &[u8]) -> Aes128GcmSiv {
-        let key = Key::from_slice(key);
+        let key = Key::<CryptoAes128GcmSiv>::from_slice(key);
         Aes128GcmSiv(CryptoAes128GcmSiv::new(key))
     }
 
     pub fn key_size() -> usize {
-        <CryptoAes128GcmSiv as NewAead>::KeySize::to_usize()
+        <CryptoAes128GcmSiv as KeySizeUser>::KeySize::to_usize()
     }
 
     pub fn nonce_size() -> usize {
@@ -51,12 +51,12 @@ pub struct Aes256GcmSiv(CryptoAes256GcmSiv);
 
 impl Aes256GcmSiv {
     pub fn new(key: &[u8]) -> Aes256GcmSiv {
-        let key = Key::from_slice(key);
+        let key = Key::<CryptoAes256GcmSiv>::from_slice(key);
         Aes256GcmSiv(CryptoAes256GcmSiv::new(key))
     }
 
     pub fn key_size() -> usize {
-        <CryptoAes256GcmSiv as NewAead>::KeySize::to_usize()
+        <CryptoAes256GcmSiv as KeySizeUser>::KeySize::to_usize()
     }
 
     pub fn nonce_size() -> usize {

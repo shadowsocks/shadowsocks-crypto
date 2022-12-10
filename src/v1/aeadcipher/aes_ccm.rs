@@ -1,6 +1,6 @@
 use aes::{Aes128, Aes256};
 use ccm::{
-    aead::{generic_array::typenum::Unsigned, AeadCore, AeadInPlace, NewAead},
+    aead::{generic_array::typenum::Unsigned, AeadCore, AeadInPlace, KeyInit, KeySizeUser},
     consts::{U12, U16},
     Ccm,
     Nonce,
@@ -15,7 +15,7 @@ impl Aes128Ccm {
     }
 
     pub fn key_size() -> usize {
-        <Ccm<Aes128, U16, U12> as NewAead>::KeySize::to_usize()
+        <Ccm<Aes128, U16, U12> as KeySizeUser>::KeySize::to_usize()
     }
 
     pub fn nonce_size() -> usize {
@@ -54,7 +54,7 @@ impl Aes256Ccm {
     }
 
     pub fn key_size() -> usize {
-        <Ccm<Aes256, U16, U12> as NewAead>::KeySize::to_usize()
+        <Ccm<Aes256, U16, U12> as KeySizeUser>::KeySize::to_usize()
     }
 
     pub fn nonce_size() -> usize {

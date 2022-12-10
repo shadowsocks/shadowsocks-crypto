@@ -1,6 +1,6 @@
 pub use chacha20poly1305::XChaCha8Poly1305 as CryptoXChaCha8Poly1305;
 use chacha20poly1305::{
-    aead::{generic_array::typenum::Unsigned, AeadCore, AeadInPlace, NewAead},
+    aead::{generic_array::typenum::Unsigned, AeadCore, AeadInPlace, KeyInit, KeySizeUser},
     Key,
     Tag,
     XNonce,
@@ -15,7 +15,7 @@ impl XChaCha8Poly1305 {
     }
 
     pub fn key_size() -> usize {
-        <CryptoXChaCha8Poly1305 as NewAead>::KeySize::to_usize()
+        <CryptoXChaCha8Poly1305 as KeySizeUser>::KeySize::to_usize()
     }
 
     pub fn nonce_size() -> usize {

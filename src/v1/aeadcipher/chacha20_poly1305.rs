@@ -6,7 +6,7 @@ cfg_if! {
 
         pub use ring_compat::aead::{ChaCha20Poly1305 as CryptoChaCha20Poly1305};
         use ring_compat::{
-            aead::{AeadCore, AeadInPlace, Buffer, Error as AeadError, NewAead},
+            aead::{AeadCore, AeadInPlace, Buffer, Error as AeadError, KeySizeUser, KeyInit},
             generic_array::{typenum::Unsigned, GenericArray},
         };
 
@@ -37,7 +37,7 @@ cfg_if! {
     } else {
         pub use chacha20poly1305::ChaCha20Poly1305 as CryptoChaCha20Poly1305;
         use chacha20poly1305::{
-            aead::{generic_array::typenum::Unsigned, AeadCore, AeadInPlace, NewAead},
+            aead::{generic_array::typenum::Unsigned, AeadCore, AeadInPlace, KeySizeUser, KeyInit},
             Key,
             Nonce,
             Tag,
@@ -54,7 +54,7 @@ impl ChaCha20Poly1305 {
     }
 
     pub fn key_size() -> usize {
-        <CryptoChaCha20Poly1305 as NewAead>::KeySize::to_usize()
+        <CryptoChaCha20Poly1305 as KeySizeUser>::KeySize::to_usize()
     }
 
     pub fn nonce_size() -> usize {

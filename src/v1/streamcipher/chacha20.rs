@@ -1,5 +1,5 @@
 use chacha20::{
-    cipher::{generic_array::typenum::Unsigned, NewCipher, StreamCipher},
+    cipher::{IvSizeUser, KeyIvInit, KeySizeUser, StreamCipher, Unsigned},
     ChaCha20,
     Key,
     Nonce,
@@ -30,10 +30,10 @@ impl Chacha20 {
     }
 
     pub fn key_size() -> usize {
-        <ChaCha20 as NewCipher>::KeySize::to_usize()
+        <ChaCha20 as KeySizeUser>::KeySize::to_usize()
     }
 
     pub fn nonce_size() -> usize {
-        <ChaCha20 as NewCipher>::NonceSize::to_usize()
+        <ChaCha20 as IvSizeUser>::IvSize::to_usize()
     }
 }
