@@ -1,7 +1,7 @@
 //! Cipher Kind
 
 #[cfg(feature = "v1-aead-extra")]
-use crate::v1::aeadcipher::{Aes128Ccm, Aes128GcmSiv, Aes256Ccm, Aes256GcmSiv, XChaCha20Poly1305};
+use crate::v1::aeadcipher::{Aes128Ccm, Aes128GcmSiv, Aes256Ccm, Aes256GcmSiv, Sm4Ccm, Sm4Gcm, XChaCha20Poly1305};
 #[cfg(feature = "v1-aead")]
 use crate::v1::aeadcipher::{Aes128Gcm, Aes256Gcm, ChaCha20Poly1305};
 
@@ -230,6 +230,15 @@ pub enum CipherKind {
     /// AEAD_XCHACHA20_POLY1305
     XCHACHA20_POLY1305,
 
+    #[cfg(feature = "v1-aead-extra")]
+    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
+    /// SM4_GCM
+    SM4_GCM,
+    #[cfg(feature = "v1-aead-extra")]
+    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
+    /// SM4_GCM
+    SM4_CCM,
+
     #[cfg(feature = "v2")]
     #[cfg_attr(docrs, doc(cfg(feature = "v2")))]
     /// 2022-blake3-aes-128-gcm
@@ -302,7 +311,9 @@ impl CipherKind {
             AES_128_GCM | AES_256_GCM | CHACHA20_POLY1305 => true,
 
             #[cfg(feature = "v1-aead-extra")]
-            AES_128_CCM | AES_256_CCM | AES_128_GCM_SIV | AES_256_GCM_SIV | XCHACHA20_POLY1305 => true,
+            AES_128_CCM | AES_256_CCM | AES_128_GCM_SIV | AES_256_GCM_SIV | XCHACHA20_POLY1305 | SM4_GCM | SM4_CCM => {
+                true
+            }
 
             _ => false,
         }
@@ -426,6 +437,11 @@ impl CipherKind {
             #[cfg(feature = "v1-aead-extra")]
             XCHACHA20_POLY1305 => XChaCha20Poly1305::key_size(),
 
+            #[cfg(feature = "v1-aead-extra")]
+            SM4_GCM => Sm4Gcm::key_size(),
+            #[cfg(feature = "v1-aead-extra")]
+            SM4_CCM => Sm4Ccm::key_size(),
+
             #[cfg(feature = "v2")]
             AEAD2022_BLAKE3_AES_128_GCM => Aead2022Aes128Gcm::key_size(),
             #[cfg(feature = "v2")]
@@ -514,6 +530,11 @@ impl CipherKind {
 
             #[cfg(feature = "v1-aead-extra")]
             XCHACHA20_POLY1305 => XChaCha20Poly1305::tag_size(),
+
+            #[cfg(feature = "v1-aead-extra")]
+            SM4_GCM => Sm4Gcm::tag_size(),
+            #[cfg(feature = "v1-aead-extra")]
+            SM4_CCM => Sm4Ccm::tag_size(),
 
             #[cfg(feature = "v2")]
             AEAD2022_BLAKE3_AES_128_GCM => Aead2022Aes128Gcm::tag_size(),
@@ -669,6 +690,11 @@ impl core::fmt::Display for CipherKind {
             #[cfg(feature = "v1-aead-extra")]
             CipherKind::XCHACHA20_POLY1305 => "xchacha20-ietf-poly1305",
 
+            #[cfg(feature = "v1-aead-extra")]
+            CipherKind::SM4_GCM => "sm4-gcm",
+            #[cfg(feature = "v1-aead-extra")]
+            CipherKind::SM4_CCM => "sm4-ccm",
+
             #[cfg(feature = "v2")]
             CipherKind::AEAD2022_BLAKE3_AES_128_GCM => "2022-blake3-aes-128-gcm",
             #[cfg(feature = "v2")]
@@ -813,6 +839,11 @@ impl core::str::FromStr for CipherKind {
 
             #[cfg(feature = "v1-aead-extra")]
             "xchacha20-ietf-poly1305" => Ok(XCHACHA20_POLY1305),
+
+            #[cfg(feature = "v1-aead-extra")]
+            "sm4-gcm" => Ok(SM4_GCM),
+            #[cfg(feature = "v1-aead-extra")]
+            "sm4-ccm" => Ok(SM4_CCM),
 
             #[cfg(feature = "v2")]
             "2022-blake3-aes-128-gcm" => Ok(AEAD2022_BLAKE3_AES_128_GCM),

@@ -7,12 +7,20 @@ mod aes_gcm;
 mod aes_gcm_siv;
 mod chacha20_poly1305;
 #[cfg(feature = "v1-aead-extra")]
+mod sm4_ccm;
+#[cfg(feature = "v1-aead-extra")]
+mod sm4_gcm;
+#[cfg(feature = "v1-aead-extra")]
+mod sm4_gcm_cipher;
+#[cfg(feature = "v1-aead-extra")]
 mod xchacha20_poly1305;
 
 #[cfg(feature = "v1-aead-extra")]
 pub use self::{
     aes_ccm::{Aes128Ccm, Aes256Ccm},
     aes_gcm_siv::{Aes128GcmSiv, Aes256GcmSiv},
+    sm4_ccm::Sm4Ccm,
+    sm4_gcm::Sm4Gcm,
     xchacha20_poly1305::XChaCha20Poly1305,
 };
 pub use self::{
@@ -34,6 +42,10 @@ enum AeadCipherVariant {
     Aes128Ccm(Aes128Ccm),
     #[cfg(feature = "v1-aead-extra")]
     Aes256Ccm(Aes256Ccm),
+    #[cfg(feature = "v1-aead-extra")]
+    Sm4Gcm(Sm4Gcm),
+    #[cfg(feature = "v1-aead-extra")]
+    Sm4Ccm(Sm4Ccm),
 }
 
 impl AeadCipherVariant {
@@ -52,6 +64,10 @@ impl AeadCipherVariant {
             CipherKind::AES_128_CCM => AeadCipherVariant::Aes128Ccm(Aes128Ccm::new(key)),
             #[cfg(feature = "v1-aead-extra")]
             CipherKind::AES_256_CCM => AeadCipherVariant::Aes256Ccm(Aes256Ccm::new(key)),
+            #[cfg(feature = "v1-aead-extra")]
+            CipherKind::SM4_GCM => AeadCipherVariant::Sm4Gcm(Sm4Gcm::new(key)),
+            #[cfg(feature = "v1-aead-extra")]
+            CipherKind::SM4_CCM => AeadCipherVariant::Sm4Ccm(Sm4Ccm::new(key)),
             _ => unreachable!("{:?} is not an AEAD cipher", kind),
         }
     }
@@ -71,6 +87,10 @@ impl AeadCipherVariant {
             AeadCipherVariant::Aes128Ccm(..) => Aes128Ccm::nonce_size(),
             #[cfg(feature = "v1-aead-extra")]
             AeadCipherVariant::Aes256Ccm(..) => Aes256Ccm::nonce_size(),
+            #[cfg(feature = "v1-aead-extra")]
+            AeadCipherVariant::Sm4Gcm(..) => Sm4Gcm::nonce_size(),
+            #[cfg(feature = "v1-aead-extra")]
+            AeadCipherVariant::Sm4Ccm(..) => Sm4Ccm::nonce_size(),
         }
     }
 
@@ -89,6 +109,10 @@ impl AeadCipherVariant {
             AeadCipherVariant::Aes128Ccm(..) => CipherKind::AES_128_CCM,
             #[cfg(feature = "v1-aead-extra")]
             AeadCipherVariant::Aes256Ccm(..) => CipherKind::AES_256_CCM,
+            #[cfg(feature = "v1-aead-extra")]
+            AeadCipherVariant::Sm4Gcm(..) => CipherKind::SM4_GCM,
+            #[cfg(feature = "v1-aead-extra")]
+            AeadCipherVariant::Sm4Ccm(..) => CipherKind::SM4_CCM,
         }
     }
 
@@ -107,6 +131,10 @@ impl AeadCipherVariant {
             AeadCipherVariant::Aes128Ccm(ref mut c) => c.encrypt(nonce, plaintext_in_ciphertext_out),
             #[cfg(feature = "v1-aead-extra")]
             AeadCipherVariant::Aes256Ccm(ref mut c) => c.encrypt(nonce, plaintext_in_ciphertext_out),
+            #[cfg(feature = "v1-aead-extra")]
+            AeadCipherVariant::Sm4Gcm(ref mut c) => c.encrypt(nonce, plaintext_in_ciphertext_out),
+            #[cfg(feature = "v1-aead-extra")]
+            AeadCipherVariant::Sm4Ccm(ref mut c) => c.encrypt(nonce, plaintext_in_ciphertext_out),
         }
     }
 
@@ -125,6 +153,10 @@ impl AeadCipherVariant {
             AeadCipherVariant::Aes128Ccm(ref mut c) => c.decrypt(nonce, ciphertext_in_plaintext_out),
             #[cfg(feature = "v1-aead-extra")]
             AeadCipherVariant::Aes256Ccm(ref mut c) => c.decrypt(nonce, ciphertext_in_plaintext_out),
+            #[cfg(feature = "v1-aead-extra")]
+            AeadCipherVariant::Sm4Gcm(ref mut c) => c.decrypt(nonce, ciphertext_in_plaintext_out),
+            #[cfg(feature = "v1-aead-extra")]
+            AeadCipherVariant::Sm4Ccm(ref mut c) => c.decrypt(nonce, ciphertext_in_plaintext_out),
         }
     }
 }
