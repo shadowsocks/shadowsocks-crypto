@@ -28,6 +28,7 @@ AEAD Ciphers：
 * [x] XCHACHA20\_POLY1305 (IETF Version)
 * [ ] AES\_128\_OCB\_TAGLEN128, AES\_192\_OCB\_TAGLEN128, AES\_256\_OCB\_TAGLEN128
 * [ ] AES\_SIV\_CMAC\_256, AES\_SIV\_CMAC\_384, AES\_SIV\_CMAC\_512
+* [x] SM4\_GCM, SM4\_CCM
 
 AEAD 2022 Ciphers ([SIP022](https://github.com/shadowsocks/shadowsocks-org/issues/196)):
 
