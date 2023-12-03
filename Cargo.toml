@@ -1,6 +1,6 @@
 [package]
 name = "shadowsocks-crypto"
-version = "0.5.3"
+version = "0.5.4"
 authors = ["luozijun <luozijun.assistant@gmail.com>", "ty <zonyitoo@gmail.com>"]
 edition = "2021"
 license = "MIT"
@@ -25,6 +25,7 @@ v1-aead-extra = [
     "ghash",
     "aead",
     "subtle",
+    "ctr",
 ]
 v2 = ["aes", "aes-gcm", "blake3", "chacha20poly1305", "bytes"]
 v2-extra = ["v2", "chacha20poly1305/reduced-round"]
