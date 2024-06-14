@@ -3,11 +3,11 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 #[cfg(feature = "v1")]
-#[cfg_attr(docrs, doc(cfg(feature = "v1")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "v1")))]
 pub mod v1;
 
 #[cfg(feature = "v2")]
-#[cfg_attr(docrs, doc(cfg(feature = "v2")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "v2")))]
 pub mod v2;
 
 pub mod kind;

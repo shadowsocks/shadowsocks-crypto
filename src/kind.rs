@@ -61,15 +61,15 @@ pub enum CipherCategory {
     None,
     /// Stream ciphers is used for OLD ShadowSocks protocol, which uses stream ciphers to encrypt data payloads
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     Stream,
     /// AEAD ciphers is used in modern ShadowSocks protocol, which sends data in separate packets
     #[cfg(feature = "v1-aead")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-aead")))]
     Aead,
     /// AEAD ciphers 2022 with enhanced security
     #[cfg(feature = "v2")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v2")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v2")))]
     Aead2022,
 }
 
@@ -81,180 +81,180 @@ pub enum CipherKind {
     NONE,
 
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     SS_TABLE,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     SS_RC4_MD5,
 
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     AES_128_CTR,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     AES_192_CTR,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     AES_256_CTR,
 
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     AES_128_CFB1,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     AES_128_CFB8,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     AES_128_CFB128,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     AES_192_CFB1,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     AES_192_CFB8,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     AES_192_CFB128,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     AES_256_CFB1,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     AES_256_CFB8,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     AES_256_CFB128,
 
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     AES_128_OFB,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     AES_192_OFB,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     AES_256_OFB,
 
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     CAMELLIA_128_CTR,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     CAMELLIA_192_CTR,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     CAMELLIA_256_CTR,
 
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     CAMELLIA_128_CFB1,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     CAMELLIA_128_CFB8,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     CAMELLIA_128_CFB128,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     CAMELLIA_192_CFB1,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     CAMELLIA_192_CFB8,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     CAMELLIA_192_CFB128,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     CAMELLIA_256_CFB1,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     CAMELLIA_256_CFB8,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     CAMELLIA_256_CFB128,
 
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     CAMELLIA_128_OFB,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     CAMELLIA_192_OFB,
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     CAMELLIA_256_OFB,
 
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     RC4,
     // NOTE: IETF 版本
     #[cfg(feature = "v1-stream")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-stream")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-stream")))]
     CHACHA20,
 
     // AEAD Cipher
     #[cfg(feature = "v1-aead")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-aead")))]
     /// AEAD_AES_128_GCM
     AES_128_GCM,
     #[cfg(feature = "v1-aead")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-aead")))]
     /// AEAD_AES_256_GCM
     AES_256_GCM,
 
     #[cfg(feature = "v1-aead-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-aead-extra")))]
     /// AEAD_AES_128_CCM
     AES_128_CCM,
     #[cfg(feature = "v1-aead-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-aead-extra")))]
     /// AEAD_AES_256_CCM
     AES_256_CCM,
 
     #[cfg(feature = "v1-aead-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-aead-extra")))]
     /// AEAD_AES_128_GCM_SIV
     AES_128_GCM_SIV,
     #[cfg(feature = "v1-aead-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-aead-extra")))]
     /// AEAD_AES_256_GCM_SIV
     AES_256_GCM_SIV,
 
     // NOTE: IETF 版本
     #[cfg(feature = "v1-aead")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-aead")))]
     /// AEAD_CHACHA20_POLY1305
     CHACHA20_POLY1305,
 
     #[cfg(feature = "v1-aead-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-aead-extra")))]
     /// AEAD_XCHACHA20_POLY1305
     XCHACHA20_POLY1305,
 
     #[cfg(feature = "v1-aead-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-aead-extra")))]
     /// SM4_GCM
     SM4_GCM,
     #[cfg(feature = "v1-aead-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v1-aead-extra")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v1-aead-extra")))]
     /// SM4_GCM
     SM4_CCM,
 
     #[cfg(feature = "v2")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v2")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v2")))]
     /// 2022-blake3-aes-128-gcm
     AEAD2022_BLAKE3_AES_128_GCM,
 
     #[cfg(feature = "v2")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v2")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v2")))]
     /// 2022-blake3-aes-128-gcm
     AEAD2022_BLAKE3_AES_256_GCM,
 
     #[cfg(feature = "v2")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v2")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v2")))]
     /// 2022-blake3-chacha20-poly1305
     AEAD2022_BLAKE3_CHACHA20_POLY1305,
     #[cfg(feature = "v2-extra")]
-    #[cfg_attr(docrs, doc(cfg(feature = "v2-extra")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v2-extra")))]
     /// 2022-blake3-chacha8-poly1305
     AEAD2022_BLAKE3_CHACHA8_POLY1305,
 }
