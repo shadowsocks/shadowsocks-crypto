@@ -6,29 +6,8 @@ use super::dummy::DummyCipher;
 #[cfg(feature = "v1-stream")]
 use super::streamcipher::StreamCipher;
 
-/// Generate random bytes into `iv_or_salt`
-pub fn random_iv_or_salt(iv_or_salt: &mut [u8]) {
-    use rand::Rng;
-
-    // Gen IV or Gen Salt by KEY-LEN
-    if iv_or_salt.is_empty() {
-        return;
-    }
-
-    let mut rng = rand::thread_rng();
-    loop {
-        rng.fill(iv_or_salt);
-
-        // https://stackoverflow.com/questions/65367552/checking-a-vecu8-to-see-if-its-all-zero
-        let (prefix, aligned, suffix) = unsafe { iv_or_salt.align_to::<u128>() };
-        let is_zeros =
-            prefix.iter().all(|&x| x == 0) && aligned.iter().all(|&x| x == 0) && suffix.iter().all(|&x| x == 0);
-
-        if !is_zeros {
-            break;
-        }
-    }
-}
+#[deprecated(since = "0.5.8", note = "prefer utils::random_iv_or_salt")]
+pub use crate::utils::random_iv_or_salt;
 
 /// Key derivation of OpenSSL's [EVP_BytesToKey](https://wiki.openssl.org/index.php/Manual:EVP_BytesToKey(3))
 pub fn openssl_bytes_to_key(password: &[u8], key: &mut [u8]) {

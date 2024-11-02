@@ -11,6 +11,7 @@ pub mod v1;
 pub mod v2;
 
 pub mod kind;
+pub mod utils;
 
 pub use self::kind::{CipherCategory, CipherKind};
 
