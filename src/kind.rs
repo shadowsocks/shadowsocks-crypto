@@ -503,6 +503,7 @@ impl CipherKind {
             RC4 => Rc4::nonce_size(),
             CHACHA20 => Chacha20::nonce_size(),
 
+            #[allow(unreachable_patterns)]
             _ => panic!("only support Stream ciphers"),
         }
     }
@@ -513,7 +514,9 @@ impl CipherKind {
         use self::CipherKind::*;
 
         match *self {
+            #[cfg(feature = "v1-aead")]
             AES_128_GCM => Aes128Gcm::tag_size(),
+            #[cfg(feature = "v1-aead")]
             AES_256_GCM => Aes256Gcm::tag_size(),
 
             #[cfg(feature = "v1-aead-extra")]
@@ -526,6 +529,7 @@ impl CipherKind {
             #[cfg(feature = "v1-aead-extra")]
             AES_256_CCM => Aes256Ccm::tag_size(),
 
+            #[cfg(feature = "v1-aead")]
             CHACHA20_POLY1305 => ChaCha20Poly1305::tag_size(),
 
             #[cfg(feature = "v1-aead-extra")]
