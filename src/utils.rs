@@ -9,7 +9,7 @@ pub fn random_iv_or_salt(iv_or_salt: &mut [u8]) {
         return;
     }
 
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     loop {
         rng.fill(iv_or_salt);
 
