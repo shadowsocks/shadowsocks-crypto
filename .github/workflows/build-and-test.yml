@@ -21,20 +21,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - name: Install Rust nightly
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          profile: minimal
-          components: clippy
-          override: true
+      - uses: Swatinem/rust-cache@v2
+      - name: Install Rust
+        run: |
+          rustup set profile minimal
+          rustup toolchain install stable
+          rustup default stable
+          rustup override set stable
       - name: Build & Test (Default)
         run: cargo test --verbose --no-fail-fast
       - name: Build & Test (--no-default-features)
