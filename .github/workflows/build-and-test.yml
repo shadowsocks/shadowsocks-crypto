@@ -34,13 +34,3 @@ jobs:
         run: cargo test --verbose --no-default-features --no-fail-fast
       - name: Build & Test with All Features Enabled
         run: cargo test --verbose --all-features
-      - name: Clippy Check
-        uses: actions-rs/clippy-check@v1
-        with:
-          name: clippy-${{ matrix.platform }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: |
-            --verbose --all-features -- -Z macro-backtrace
-            -W clippy::absurd_extreme_comparisons
-            -W clippy::erasing_op
-            -A clippy::collapsible_else_if

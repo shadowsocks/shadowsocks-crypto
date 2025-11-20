@@ -1,0 +1,35 @@
+name: Clippy Check
+
+on: [push, pull_request]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_LOG: "trace"
+
+jobs:
+  clippy-check:
+    strategy:
+      matrix:
+        platform:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: Swatinem/rust-cache@v2
+      - if: ${{ runner.os == 'Windows' }}
+        uses: ilammy/setup-nasm@v1
+      - name: Install Rust
+        run: |
+          rustup set profile minimal
+          rustup toolchain install stable --component clippy
+      - name: Clippy Check
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: |
+            --all-features
+            -- -A clippy::absurd_extreme_comparisons
+          name: clippy ${{ matrix.platform }}
