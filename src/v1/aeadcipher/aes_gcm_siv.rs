@@ -66,7 +66,7 @@ cfg_if! {
         aead_gcm_siv_cipher!(Aes256GcmSiv, AES_256_GCM_SIV);
     } else {
         use aes_gcm_siv::{
-            aead::{generic_array::typenum::Unsigned, AeadCore, AeadInPlace, KeyInit, KeySizeUser},
+            aead::{array::typenum::Unsigned, AeadCore, AeadInOut, KeyInit, KeySizeUser},
             Aes128GcmSiv as CryptoAes128GcmSiv,
             Aes256GcmSiv as CryptoAes256GcmSiv,
             Key,
@@ -78,8 +78,8 @@ cfg_if! {
 
         impl Aes128GcmSiv {
             pub fn new(key: &[u8]) -> Aes128GcmSiv {
-                let key = Key::<CryptoAes128GcmSiv>::from_slice(key);
-                Aes128GcmSiv(CryptoAes128GcmSiv::new(key))
+                let key = Key::<CryptoAes128GcmSiv>::try_from(key).expect("AES_128_GCM_SIV key");
+                Aes128GcmSiv(CryptoAes128GcmSiv::new(&key))
             }
 
             pub fn key_size() -> usize {
@@ -95,22 +95,25 @@ cfg_if! {
             }
 
             pub fn encrypt(&self, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
-                let nonce = Nonce::from_slice(nonce);
+                let nonce = Nonce::try_from(nonce).expect("AES_128_GCM_SIV nonce");
                 let (plaintext, out_tag) =
                     plaintext_in_ciphertext_out.split_at_mut(plaintext_in_ciphertext_out.len() - Self::tag_size());
                 let tag = self
                     .0
-                    .encrypt_in_place_detached(nonce, &[], plaintext)
+                    .encrypt_inout_detached(&nonce, &[], plaintext.into())
                     .expect("AES_128_GCM_SIV encrypt");
                 out_tag.copy_from_slice(tag.as_slice())
             }
 
             pub fn decrypt(&self, nonce: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
-                let nonce = Nonce::from_slice(nonce);
+                let nonce = Nonce::try_from(nonce).expect("AES_128_GCM_SIV nonce");
                 let (ciphertext, in_tag) =
                     ciphertext_in_plaintext_out.split_at_mut(ciphertext_in_plaintext_out.len() - Self::tag_size());
-                let in_tag = Tag::from_slice(in_tag);
-                self.0.decrypt_in_place_detached(nonce, &[], ciphertext, in_tag).is_ok()
+                let in_tag = match Tag::try_from(&*in_tag) {
+                    Ok(t) => t,
+                    Err(_) => return false,
+                };
+                self.0.decrypt_inout_detached(&nonce, &[], ciphertext.into(), &in_tag).is_ok()
             }
         }
 
@@ -118,8 +121,8 @@ cfg_if! {
 
         impl Aes256GcmSiv {
             pub fn new(key: &[u8]) -> Aes256GcmSiv {
-                let key = Key::<CryptoAes256GcmSiv>::from_slice(key);
-                Aes256GcmSiv(CryptoAes256GcmSiv::new(key))
+                let key = Key::<CryptoAes256GcmSiv>::try_from(key).expect("AES_256_GCM_SIV key");
+                Aes256GcmSiv(CryptoAes256GcmSiv::new(&key))
             }
 
             pub fn key_size() -> usize {
@@ -135,22 +138,25 @@ cfg_if! {
             }
 
             pub fn encrypt(&mut self, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
-                let nonce = Nonce::from_slice(nonce);
+                let nonce = Nonce::try_from(nonce).expect("AES_256_GCM_SIV nonce");
                 let (plaintext, out_tag) =
                     plaintext_in_ciphertext_out.split_at_mut(plaintext_in_ciphertext_out.len() - Self::tag_size());
                 let tag = self
                     .0
-                    .encrypt_in_place_detached(nonce, &[], plaintext)
+                    .encrypt_inout_detached(&nonce, &[], plaintext.into())
                     .expect("AES_256_GCM_SIV encrypt");
                 out_tag.copy_from_slice(tag.as_slice())
             }
 
             pub fn decrypt(&mut self, nonce: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
-                let nonce = Nonce::from_slice(nonce);
+                let nonce = Nonce::try_from(nonce).expect("AES_256_GCM_SIV nonce");
                 let (ciphertext, in_tag) =
                     ciphertext_in_plaintext_out.split_at_mut(ciphertext_in_plaintext_out.len() - Self::tag_size());
-                let in_tag = Tag::from_slice(in_tag);
-                self.0.decrypt_in_place_detached(nonce, &[], ciphertext, in_tag).is_ok()
+                let in_tag = match Tag::try_from(&*in_tag) {
+                    Ok(t) => t,
+                    Err(_) => return false,
+                };
+                self.0.decrypt_inout_detached(&nonce, &[], ciphertext.into(), &in_tag).is_ok()
             }
         }
     }

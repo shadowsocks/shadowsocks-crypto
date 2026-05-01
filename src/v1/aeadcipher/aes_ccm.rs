@@ -1,6 +1,6 @@
 use aes::{Aes128, Aes256};
 use ccm::{
-    aead::{generic_array::typenum::Unsigned, AeadCore, AeadInPlace, KeyInit, KeySizeUser},
+    aead::{array::typenum::Unsigned, AeadCore, AeadInOut, KeyInit, KeySizeUser},
     consts::{U12, U16},
     Ccm,
     Nonce,
@@ -27,22 +27,25 @@ impl Aes128Ccm {
     }
 
     pub fn encrypt(&self, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
-        let nonce = Nonce::from_slice(nonce);
+        let nonce = Nonce::<U12>::try_from(nonce).expect("AES_128_CCM nonce");
         let (plaintext, out_tag) =
             plaintext_in_ciphertext_out.split_at_mut(plaintext_in_ciphertext_out.len() - Self::tag_size());
         let tag = self
             .0
-            .encrypt_in_place_detached(nonce, &[], plaintext)
+            .encrypt_inout_detached(&nonce, &[], plaintext.into())
             .expect("AES_128_CCM encrypt");
         out_tag.copy_from_slice(tag.as_slice())
     }
 
     pub fn decrypt(&self, nonce: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
-        let nonce = Nonce::from_slice(nonce);
+        let nonce = Nonce::<U12>::try_from(nonce).expect("AES_128_CCM nonce");
         let (ciphertext, in_tag) =
             ciphertext_in_plaintext_out.split_at_mut(ciphertext_in_plaintext_out.len() - Self::tag_size());
-        let in_tag = Tag::from_slice(in_tag);
-        self.0.decrypt_in_place_detached(nonce, &[], ciphertext, in_tag).is_ok()
+        let in_tag = match Tag::<U16>::try_from(&*in_tag) {
+            Ok(t) => t,
+            Err(_) => return false,
+        };
+        self.0.decrypt_inout_detached(&nonce, &[], ciphertext.into(), &in_tag).is_ok()
     }
 }
 
@@ -66,21 +69,24 @@ impl Aes256Ccm {
     }
 
     pub fn encrypt(&mut self, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
-        let nonce = Nonce::from_slice(nonce);
+        let nonce = Nonce::<U12>::try_from(nonce).expect("AES_256_CCM nonce");
         let (plaintext, out_tag) =
             plaintext_in_ciphertext_out.split_at_mut(plaintext_in_ciphertext_out.len() - Self::tag_size());
         let tag = self
             .0
-            .encrypt_in_place_detached(nonce, &[], plaintext)
+            .encrypt_inout_detached(&nonce, &[], plaintext.into())
             .expect("AES_256_CCM encrypt");
         out_tag.copy_from_slice(tag.as_slice())
     }
 
     pub fn decrypt(&mut self, nonce: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
-        let nonce = Nonce::from_slice(nonce);
+        let nonce = Nonce::<U12>::try_from(nonce).expect("AES_256_CCM nonce");
         let (ciphertext, in_tag) =
             ciphertext_in_plaintext_out.split_at_mut(ciphertext_in_plaintext_out.len() - Self::tag_size());
-        let in_tag = Tag::from_slice(in_tag);
-        self.0.decrypt_in_place_detached(nonce, &[], ciphertext, in_tag).is_ok()
+        let in_tag = match Tag::<U16>::try_from(&*in_tag) {
+            Ok(t) => t,
+            Err(_) => return false,
+        };
+        self.0.decrypt_inout_detached(&nonce, &[], ciphertext.into(), &in_tag).is_ok()
     }
 }

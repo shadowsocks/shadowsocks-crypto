@@ -3,17 +3,19 @@
 //! https://datatracker.ietf.org/doc/html/rfc8998
 
 use aead::{
-    consts::{U0, U12, U16},
-    generic_array::GenericArray,
+    array::{typenum::Unsigned, Array},
+    consts::{U12, U16},
+    inout::InOutBuf,
     AeadCore,
-    AeadInPlace,
+    AeadInOut,
     Key,
     KeyInit,
     KeySizeUser,
+    TagPosition,
 };
 use ghash::{universal_hash::UniversalHash, GHash};
 use sm4::{
-    cipher::{BlockEncrypt, InnerIvInit, StreamCipherCore, Unsigned},
+    cipher::{BlockCipherEncrypt, InnerIvInit, StreamCipherCore},
     Sm4,
 };
 
@@ -27,13 +29,13 @@ pub const P_MAX: u64 = 1 << 36;
 pub const C_MAX: u64 = (1 << 36) + 16;
 
 /// SM4-GCM nonces.
-pub type Nonce = GenericArray<u8, U12>;
+pub type Nonce = Array<u8, U12>;
 
 /// SM4-GCM tags.
-pub type Tag = GenericArray<u8, U16>;
+pub type Tag = Array<u8, U16>;
 
 /// SM4 block.
-type Block = GenericArray<u8, U16>;
+type Block = Array<u8, U16>;
 
 /// Counter mode with a 32-bit big endian counter.
 type Ctr32BE<'a> = ctr::CtrCore<&'a Sm4, ctr::flavors::Ctr32BE>;
@@ -67,13 +69,18 @@ impl From<Sm4> for Sm4Gcm {
 }
 
 impl AeadCore for Sm4Gcm {
-    type CiphertextOverhead = U0;
     type NonceSize = U12;
     type TagSize = U16;
+    const TAG_POSITION: TagPosition = TagPosition::Postfix;
 }
 
-impl AeadInPlace for Sm4Gcm {
-    fn encrypt_in_place_detached(&self, nonce: &Nonce, associated_data: &[u8], buffer: &mut [u8]) -> aead::Result<Tag> {
+impl AeadInOut for Sm4Gcm {
+    fn encrypt_inout_detached(
+        &self,
+        nonce: &Nonce,
+        associated_data: &[u8],
+        mut buffer: InOutBuf<'_, '_, u8>,
+    ) -> aead::Result<Tag> {
         if buffer.len() as u64 > P_MAX || associated_data.len() as u64 > A_MAX {
             return Err(aead::Error);
         }
@@ -82,17 +89,17 @@ impl AeadInPlace for Sm4Gcm {
 
         // TODO(tarcieri): interleave encryption with GHASH
         // See: <https://github.com/RustCrypto/AEADs/issues/74>
-        ctr.apply_keystream_partial(buffer.into());
+        ctr.apply_keystream_partial(buffer.reborrow());
 
-        let full_tag = self.compute_tag(mask, associated_data, buffer);
-        Ok(Tag::clone_from_slice(&full_tag[..Self::TagSize::to_usize()]))
+        let full_tag = self.compute_tag(mask, associated_data, buffer.get_out());
+        Ok(Tag::try_from(&full_tag[..Self::TagSize::to_usize()]).expect("tag size"))
     }
 
-    fn decrypt_in_place_detached(
+    fn decrypt_inout_detached(
         &self,
         nonce: &Nonce,
         associated_data: &[u8],
-        buffer: &mut [u8],
+        mut buffer: InOutBuf<'_, '_, u8>,
         tag: &Tag,
     ) -> aead::Result<()> {
         if buffer.len() as u64 > C_MAX || associated_data.len() as u64 > A_MAX {
@@ -103,14 +110,14 @@ impl AeadInPlace for Sm4Gcm {
 
         // TODO(tarcieri): interleave encryption with GHASH
         // See: <https://github.com/RustCrypto/AEADs/issues/74>
-        let expected_tag = self.compute_tag(mask, associated_data, buffer);
+        let expected_tag = self.compute_tag(mask, associated_data, buffer.get_in());
 
         use subtle::ConstantTimeEq;
         if expected_tag[..<Self as AeadCore>::TagSize::to_usize()]
             .ct_eq(tag)
             .into()
         {
-            ctr.apply_keystream_partial(buffer.into());
+            ctr.apply_keystream_partial(buffer.reborrow());
             Ok(())
         } else {
             Err(aead::Error)
@@ -188,14 +195,14 @@ mod test {
         let mut tag = hex::decode("83DE3541E4C2B58177E065A9BF7B62EC").unwrap();
         cipher_text.append(&mut tag); // postfix tag
 
-        let nonce = super::Nonce::from_slice(&iv);
+        let nonce = super::Nonce::try_from(&iv[..]).unwrap();
 
         let cipher = super::Sm4Gcm::new_from_slice(&key).unwrap();
         let plain_text_payload = Payload {
             msg: &plain_text,
             aad: &aad,
         };
-        let result = cipher.encrypt(nonce, plain_text_payload).unwrap();
+        let result = cipher.encrypt(&nonce, plain_text_payload).unwrap();
 
         assert_eq!(result, cipher_text);
     }
