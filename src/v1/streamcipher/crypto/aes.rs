@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use aes::{
-    cipher::{BlockDecrypt, BlockEncrypt, BlockSizeUser, KeyInit, Unsigned},
+    cipher::{BlockCipherDecrypt, BlockCipherEncrypt, BlockSizeUser, KeyInit, typenum::Unsigned},
     Aes128 as CryptoAes128,
     Aes192 as CryptoAes192,
     Aes256 as CryptoAes256,
@@ -20,12 +20,12 @@ impl Aes128 {
     }
 
     pub fn encrypt(&self, block: &mut [u8]) {
-        let block = Block::from_mut_slice(block);
+        let block = <&mut Block>::try_from(block).expect("block size");
         self.0.encrypt_block(block);
     }
 
     pub fn decrypt(&self, block: &mut [u8]) {
-        let block = Block::from_mut_slice(block);
+        let block = <&mut Block>::try_from(block).expect("block size");
         self.0.decrypt_block(block);
     }
 }
@@ -42,12 +42,12 @@ impl Aes192 {
     }
 
     pub fn encrypt(&self, block: &mut [u8]) {
-        let block = Block::from_mut_slice(block);
+        let block = <&mut Block>::try_from(block).expect("block size");
         self.0.encrypt_block(block);
     }
 
     pub fn decrypt(&self, block: &mut [u8]) {
-        let block = Block::from_mut_slice(block);
+        let block = <&mut Block>::try_from(block).expect("block size");
         self.0.decrypt_block(block);
     }
 }
@@ -64,12 +64,12 @@ impl Aes256 {
     }
 
     pub fn encrypt(&self, block: &mut [u8]) {
-        let block = Block::from_mut_slice(block);
+        let block = <&mut Block>::try_from(block).expect("block size");
         self.0.encrypt_block(block);
     }
 
     pub fn decrypt(&self, block: &mut [u8]) {
-        let block = Block::from_mut_slice(block);
+        let block = <&mut Block>::try_from(block).expect("block size");
         self.0.decrypt_block(block);
     }
 }

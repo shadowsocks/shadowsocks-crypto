@@ -3,7 +3,7 @@
 //! https://datatracker.ietf.org/doc/html/rfc8998
 
 use ccm::{
-    aead::{generic_array::typenum::Unsigned, AeadCore, AeadInPlace, KeyInit, KeySizeUser},
+    aead::{array::typenum::Unsigned, AeadCore, AeadInOut, KeyInit, KeySizeUser},
     consts::{U12, U16},
     Ccm,
     Nonce,
@@ -31,22 +31,25 @@ impl Sm4Ccm {
     }
 
     pub fn encrypt(&self, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
-        let nonce = Nonce::from_slice(nonce);
+        let nonce = Nonce::<U12>::try_from(nonce).expect("SM4_CCM nonce");
         let (plaintext, out_tag) =
             plaintext_in_ciphertext_out.split_at_mut(plaintext_in_ciphertext_out.len() - Self::tag_size());
         let tag = self
             .0
-            .encrypt_in_place_detached(nonce, &[], plaintext)
+            .encrypt_inout_detached(&nonce, &[], plaintext.into())
             .expect("SM4_CCM encrypt");
         out_tag.copy_from_slice(tag.as_slice())
     }
 
     pub fn decrypt(&self, nonce: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
-        let nonce = Nonce::from_slice(nonce);
+        let nonce = Nonce::<U12>::try_from(nonce).expect("SM4_CCM nonce");
         let (ciphertext, in_tag) =
             ciphertext_in_plaintext_out.split_at_mut(ciphertext_in_plaintext_out.len() - Self::tag_size());
-        let in_tag = Tag::from_slice(in_tag);
-        self.0.decrypt_in_place_detached(nonce, &[], ciphertext, in_tag).is_ok()
+        let in_tag = match Tag::<U16>::try_from(&*in_tag) {
+            Ok(t) => t,
+            Err(_) => return false,
+        };
+        self.0.decrypt_inout_detached(&nonce, &[], ciphertext.into(), &in_tag).is_ok()
     }
 }
 
@@ -69,14 +72,14 @@ mod test {
         let mut tag = hex::decode("16842D4FA186F56AB33256971FA110F4").unwrap();
         cipher_text.append(&mut tag); // postfix tag
 
-        let nonce = super::Nonce::from_slice(&iv);
+        let nonce = super::Nonce::<U12>::try_from(&iv[..]).unwrap();
 
         let cipher = Ccm::<Sm4, U16, U12>::new_from_slice(&key).unwrap();
         let plain_text_payload = Payload {
             msg: &plain_text,
             aad: &aad,
         };
-        let result = cipher.encrypt(nonce, plain_text_payload).unwrap();
+        let result = cipher.encrypt(&nonce, plain_text_payload).unwrap();
 
         assert_eq!(result, cipher_text);
     }

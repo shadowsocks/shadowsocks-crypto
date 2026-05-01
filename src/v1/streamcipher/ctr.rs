@@ -2,7 +2,7 @@
 // https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf
 
 use aes::{
-    cipher::{Iv, IvSizeUser, Key, KeyIvInit, StreamCipher, Unsigned},
+    cipher::{Iv, IvSizeUser, Key, KeyIvInit, StreamCipher, typenum::Unsigned},
     Aes128 as CryptoAes128,
     Aes192 as CryptoAes192,
     Aes256 as CryptoAes256,
@@ -25,9 +25,9 @@ impl Aes128Ctr {
     pub const KEY_LEN: usize = Aes128::KEY_LEN;
 
     pub fn new(key: &[u8], iv: &[u8]) -> Aes128Ctr {
-        let key = Key::<CryptoAes128Ctr>::from_slice(key);
-        let iv = Iv::<CryptoAes128Ctr>::from_slice(iv);
-        let ctr = CryptoAes128Ctr::new(key, iv);
+        let key = Key::<CryptoAes128Ctr>::try_from(key).expect("Aes128Ctr key");
+        let iv = Iv::<CryptoAes128Ctr>::try_from(iv).expect("Aes128Ctr iv");
+        let ctr = CryptoAes128Ctr::new(&key, &iv);
         Aes128Ctr(ctr)
     }
 
@@ -47,9 +47,9 @@ impl Aes192Ctr {
     pub const KEY_LEN: usize = Aes192::KEY_LEN;
 
     pub fn new(key: &[u8], iv: &[u8]) -> Aes192Ctr {
-        let key = Key::<CryptoAes192Ctr>::from_slice(key);
-        let iv = Iv::<CryptoAes192Ctr>::from_slice(iv);
-        let ctr = CryptoAes192Ctr::new(key, iv);
+        let key = Key::<CryptoAes192Ctr>::try_from(key).expect("Aes192Ctr key");
+        let iv = Iv::<CryptoAes192Ctr>::try_from(iv).expect("Aes192Ctr iv");
+        let ctr = CryptoAes192Ctr::new(&key, &iv);
         Aes192Ctr(ctr)
     }
 
@@ -69,9 +69,9 @@ impl Aes256Ctr {
     pub const KEY_LEN: usize = Aes256::KEY_LEN;
 
     pub fn new(key: &[u8], iv: &[u8]) -> Aes256Ctr {
-        let key = Key::<CryptoAes256Ctr>::from_slice(key);
-        let iv = Iv::<CryptoAes256Ctr>::from_slice(iv);
-        let ctr = CryptoAes256Ctr::new(key, iv);
+        let key = Key::<CryptoAes256Ctr>::try_from(key).expect("Aes256Ctr key");
+        let iv = Iv::<CryptoAes256Ctr>::try_from(iv).expect("Aes256Ctr iv");
+        let ctr = CryptoAes256Ctr::new(&key, &iv);
         Aes256Ctr(ctr)
     }
 

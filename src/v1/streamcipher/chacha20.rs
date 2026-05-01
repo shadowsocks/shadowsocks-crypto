@@ -1,8 +1,7 @@
 use chacha20::{
-    cipher::{IvSizeUser, KeyIvInit, KeySizeUser, StreamCipher, Unsigned},
+    cipher::{IvSizeUser, Iv, KeyIvInit, KeySizeUser, StreamCipher, typenum::Unsigned},
     ChaCha20,
     Key,
-    Nonce,
 };
 
 /// ChaCha20 for IETF Protocols
@@ -14,9 +13,9 @@ pub struct Chacha20 {
 
 impl Chacha20 {
     pub fn new(key: &[u8], nonce: &[u8]) -> Self {
-        let key = Key::from_slice(key);
-        let nonce = Nonce::from_slice(nonce);
-        let cipher = ChaCha20::new(key, nonce);
+        let key = Key::try_from(key).expect("chacha20 key");
+        let nonce = Iv::<ChaCha20>::try_from(nonce).expect("chacha20 nonce");
+        let cipher = ChaCha20::new(&key, &nonce);
 
         Self { cipher }
     }

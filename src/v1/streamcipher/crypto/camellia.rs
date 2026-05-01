@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use camellia::{
-    cipher::{Block, BlockDecrypt, BlockEncrypt, BlockSizeUser, KeyInit, KeySizeUser, Unsigned},
+    cipher::{Block, BlockCipherDecrypt, BlockCipherEncrypt, BlockSizeUser, KeyInit, KeySizeUser, typenum::Unsigned},
     Camellia128 as CryptoCamellia128,
     Camellia192 as CryptoCamellia192,
     Camellia256 as CryptoCamellia256,
@@ -19,12 +19,12 @@ impl Camellia128 {
     }
 
     pub fn encrypt(&self, block: &mut [u8]) {
-        let block = Block::<CryptoCamellia128>::from_mut_slice(block);
+        let block = <&mut Block<CryptoCamellia128>>::try_from(block).expect("block size");
         self.0.encrypt_block(block);
     }
 
     pub fn decrypt(&self, block: &mut [u8]) {
-        let block = Block::<CryptoCamellia128>::from_mut_slice(block);
+        let block = <&mut Block<CryptoCamellia128>>::try_from(block).expect("block size");
         self.0.decrypt_block(block);
     }
 }
@@ -41,12 +41,12 @@ impl Camellia192 {
     }
 
     pub fn encrypt(&self, block: &mut [u8]) {
-        let block = Block::<CryptoCamellia192>::from_mut_slice(block);
+        let block = <&mut Block<CryptoCamellia192>>::try_from(block).expect("block size");
         self.0.encrypt_block(block);
     }
 
     pub fn decrypt(&self, block: &mut [u8]) {
-        let block = Block::<CryptoCamellia192>::from_mut_slice(block);
+        let block = <&mut Block<CryptoCamellia192>>::try_from(block).expect("block size");
         self.0.decrypt_block(block);
     }
 }
@@ -63,12 +63,12 @@ impl Camellia256 {
     }
 
     pub fn encrypt(&self, block: &mut [u8]) {
-        let block = Block::<CryptoCamellia256>::from_mut_slice(block);
+        let block = <&mut Block<CryptoCamellia256>>::try_from(block).expect("block size");
         self.0.encrypt_block(block);
     }
 
     pub fn decrypt(&self, block: &mut [u8]) {
-        let block = Block::<CryptoCamellia256>::from_mut_slice(block);
+        let block = <&mut Block<CryptoCamellia256>>::try_from(block).expect("block size");
         self.0.decrypt_block(block);
     }
 }

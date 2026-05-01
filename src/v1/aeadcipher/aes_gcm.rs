@@ -99,19 +99,20 @@ cfg_if! {
         }
     } else {
         use aes_gcm::{
-            aead::{generic_array::typenum::Unsigned, AeadCore, AeadInPlace, KeySizeUser, KeyInit},
-            Key,
-            Nonce,
-            Tag,
+            aead::{self, array::typenum::Unsigned, AeadCore, AeadInOut, KeySizeUser, KeyInit},
         };
         use aes_gcm::{Aes128Gcm as CryptoAes128Gcm, Aes256Gcm as CryptoAes256Gcm};
+
+        type Key<A> = aead::Key<A>;
+        type Nonce<A> = aead::Nonce<A>;
+        type Tag<A> = aead::Tag<A>;
 
         pub struct Aes128Gcm(Box<CryptoAes128Gcm>);
 
         impl Aes128Gcm {
             pub fn new(key: &[u8]) -> Aes128Gcm {
-                let key = Key::<CryptoAes128Gcm>::from_slice(key);
-                Aes128Gcm(Box::new(CryptoAes128Gcm::new(key)))
+                let key = Key::<CryptoAes128Gcm>::try_from(key).expect("AES_128_GCM key");
+                Aes128Gcm(Box::new(CryptoAes128Gcm::new(&key)))
             }
 
             pub fn key_size() -> usize {
@@ -127,22 +128,25 @@ cfg_if! {
             }
 
             pub fn encrypt(&self, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
-                let nonce = Nonce::from_slice(nonce);
+                let nonce = Nonce::<CryptoAes128Gcm>::try_from(nonce).expect("AES_128_GCM nonce");
                 let (plaintext, out_tag) =
                     plaintext_in_ciphertext_out.split_at_mut(plaintext_in_ciphertext_out.len() - Self::tag_size());
                 let tag = self
                     .0
-                    .encrypt_in_place_detached(nonce, &[], plaintext)
+                    .encrypt_inout_detached(&nonce, &[], plaintext.into())
                     .expect("AES_128_GCM encrypt");
                 out_tag.copy_from_slice(tag.as_slice())
             }
 
             pub fn decrypt(&self, nonce: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
-                let nonce = Nonce::from_slice(nonce);
+                let nonce = Nonce::<CryptoAes128Gcm>::try_from(nonce).expect("AES_128_GCM nonce");
                 let (ciphertext, in_tag) =
                     ciphertext_in_plaintext_out.split_at_mut(ciphertext_in_plaintext_out.len() - Self::tag_size());
-                let in_tag = Tag::from_slice(in_tag);
-                self.0.decrypt_in_place_detached(nonce, &[], ciphertext, in_tag).is_ok()
+                let in_tag = match Tag::<CryptoAes128Gcm>::try_from(&*in_tag) {
+                    Ok(t) => t,
+                    Err(_) => return false,
+                };
+                self.0.decrypt_inout_detached(&nonce, &[], ciphertext.into(), &in_tag).is_ok()
             }
         }
 
@@ -150,8 +154,8 @@ cfg_if! {
 
         impl Aes256Gcm {
             pub fn new(key: &[u8]) -> Aes256Gcm {
-                let key = Key::<CryptoAes256Gcm>::from_slice(key);
-                Aes256Gcm(Box::new(CryptoAes256Gcm::new(key)))
+                let key = Key::<CryptoAes256Gcm>::try_from(key).expect("AES_256_GCM key");
+                Aes256Gcm(Box::new(CryptoAes256Gcm::new(&key)))
             }
 
             pub fn key_size() -> usize {
@@ -167,22 +171,25 @@ cfg_if! {
             }
 
             pub fn encrypt(&self, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
-                let nonce = Nonce::from_slice(nonce);
+                let nonce = Nonce::<CryptoAes256Gcm>::try_from(nonce).expect("AES_256_GCM nonce");
                 let (plaintext, out_tag) =
                     plaintext_in_ciphertext_out.split_at_mut(plaintext_in_ciphertext_out.len() - Self::tag_size());
                 let tag = self
                     .0
-                    .encrypt_in_place_detached(nonce, &[], plaintext)
+                    .encrypt_inout_detached(&nonce, &[], plaintext.into())
                     .expect("AES_256_GCM encrypt");
                 out_tag.copy_from_slice(tag.as_slice())
             }
 
             pub fn decrypt(&self, nonce: &[u8], ciphertext_in_plaintext_out: &mut [u8]) -> bool {
-                let nonce = Nonce::from_slice(nonce);
+                let nonce = Nonce::<CryptoAes256Gcm>::try_from(nonce).expect("AES_256_GCM nonce");
                 let (ciphertext, in_tag) =
                     ciphertext_in_plaintext_out.split_at_mut(ciphertext_in_plaintext_out.len() - Self::tag_size());
-                let in_tag = Tag::from_slice(in_tag);
-                self.0.decrypt_in_place_detached(nonce, &[], ciphertext, in_tag).is_ok()
+                let in_tag = match Tag::<CryptoAes256Gcm>::try_from(&*in_tag) {
+                    Ok(t) => t,
+                    Err(_) => return false,
+                };
+                self.0.decrypt_inout_detached(&nonce, &[], ciphertext.into(), &in_tag).is_ok()
             }
         }
     }
