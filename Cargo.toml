@@ -39,10 +39,10 @@ aws-lc = ["dep:aws-lc-rs"]
 [dependencies]
 cfg-if = { version = "1.0", optional = true }
 rand = "0.10"
-aes-gcm = { version = "0.11.0-rc.3", optional = true }
-aes-gcm-siv = { version = "0.12.0-rc.3", optional = true }
-ccm = { version = "0.6.0-rc.3", optional = true }
-chacha20poly1305 = { version = "0.11.0-rc.3", optional = true }
+aes-gcm = { version = "0.11", optional = true }
+aes-gcm-siv = { version = "0.12", optional = true }
+ccm = { version = "0.6", optional = true }
+chacha20poly1305 = { version = "0.11", optional = true }
 ring-compat = { version = "0.8", default-features = false, features = [
     "aead",
     "alloc",
@@ -59,7 +59,7 @@ bytes = { version = "1.11", optional = true }
 camellia = { version = "0.2", optional = true }
 sm4 = { version = "0.6", optional = true }
 ghash = { version = "0.6", optional = true }
-aead = { version = "0.6.0-rc.10", optional = true }
+aead = { version = "0.6", optional = true }
 subtle = { version = "2.6", optional = true }
 
 #[target.'cfg(all(unix, any(target_arch = "x86", target_arch = "x86_64")))'.dependencies]
