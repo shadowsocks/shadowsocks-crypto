@@ -96,8 +96,8 @@ impl Cipher {
                 let mut okm = [0u8; MAX_KEY_LEN];
 
                 cfg_if! {
-                    if #[cfg(feature = "aws-lc")] {
-                        use aws_lc_rs::hkdf::{Salt, HKDF_SHA1_FOR_LEGACY_USE_ONLY, KeyType};
+                    if #[cfg(any(feature = "aws-lc", feature = "ring"))] {
+                        use crate::ring_api::hkdf::{Salt, HKDF_SHA1_FOR_LEGACY_USE_ONLY, KeyType};
 
                         struct CryptoKeyType(usize);
 

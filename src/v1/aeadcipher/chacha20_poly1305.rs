@@ -1,15 +1,16 @@
 use cfg_if::cfg_if;
 
 cfg_if! {
-    if #[cfg(feature = "aws-lc")] {
-        use aws_lc_rs::aead::{Aad, LessSafeKey, Nonce, UnboundKey, CHACHA20_POLY1305};
+    if #[cfg(any(feature = "aws-lc", feature = "ring"))] {
+        use crate::ring_api::aead::{Aad, LessSafeKey, Nonce, UnboundKey, CHACHA20_POLY1305};
 
-        pub struct ChaCha20Poly1305(LessSafeKey);
+        // Boxed: ring's `LessSafeKey` stores key material inline (~540 bytes).
+        pub struct ChaCha20Poly1305(Box<LessSafeKey>);
 
         impl ChaCha20Poly1305 {
             pub fn new(key: &[u8]) -> ChaCha20Poly1305 {
                 let unbound = UnboundKey::new(&CHACHA20_POLY1305, key).expect("CHACHA20_POLY1305 key");
-                ChaCha20Poly1305(LessSafeKey::new(unbound))
+                ChaCha20Poly1305(Box::new(LessSafeKey::new(unbound)))
             }
 
             pub fn key_size() -> usize {
@@ -39,39 +40,6 @@ cfg_if! {
                 let nonce = Nonce::try_assume_unique_for_key(nonce).expect("CHACHA20_POLY1305 nonce");
                 self.0.open_in_place(nonce, Aad::empty(), ciphertext_in_plaintext_out).is_ok()
             }
-        }
-    } else if #[cfg(feature = "ring")] {
-        use std::convert::{AsMut, AsRef};
-
-        pub use ring_compat::aead::{ChaCha20Poly1305 as CryptoChaCha20Poly1305};
-        use ring_compat::{
-            aead::{AeadCore, AeadInPlace, Buffer, Error as AeadError, KeySizeUser, KeyInit},
-            generic_array::{typenum::Unsigned, GenericArray},
-        };
-
-        type Key<KeySize> = GenericArray<u8, KeySize>;
-        type Nonce<NonceSize> = GenericArray<u8, NonceSize>;
-
-        struct SliceBuffer<'a>(&'a mut [u8]);
-
-        impl AsRef<[u8]> for SliceBuffer<'_> {
-            fn as_ref(&self) -> &[u8] {
-                self.0
-            }
-        }
-
-        impl AsMut<[u8]> for SliceBuffer<'_> {
-            fn as_mut(&mut self) -> &mut [u8] {
-                self.0
-            }
-        }
-
-        impl Buffer for SliceBuffer<'_> {
-            fn extend_from_slice(&mut self, _other: &[u8]) -> Result<(), AeadError> {
-                unimplemented!("not used in decrypt_in_place")
-            }
-
-            fn truncate(&mut self, _len: usize) {}
         }
     } else {
         use chacha20poly1305::ChaCha20Poly1305 as CryptoChaCha20Poly1305;

@@ -30,7 +30,9 @@ v1-aead-extra = [
 v2 = ["aes", "aes-gcm", "blake3", "chacha20poly1305", "bytes", "cfg-if"]
 v2-extra = ["v2", "chacha20poly1305/reduced-round"]
 
-ring = ["ring-compat"]
+# Use `ring` for the AEAD/HKDF implementations instead of the pure-Rust ones.
+# Useful on targets where aws-lc-rs cannot be built. Ignored if `aws-lc` is enabled.
+ring = ["dep:ring"]
 # Swap the pure-Rust AEAD/HKDF implementations for the AWS-LC-backed `aws-lc-rs`
 # crate for higher throughput. Platforms not supported by aws-lc-rs (e.g. WASM,
 # exotic targets) must leave this feature off and use the pure-Rust fallback.
@@ -43,10 +45,7 @@ aes-gcm = { version = "0.11", optional = true }
 aes-gcm-siv = { version = "0.12", optional = true }
 ccm = { version = "0.6", optional = true }
 chacha20poly1305 = { version = "0.11", optional = true }
-ring-compat = { version = "0.8", default-features = false, features = [
-    "aead",
-    "alloc",
-], optional = true }
+ring = { version = "0.17", optional = true }
 aws-lc-rs = { version = "1.16", optional = true }
 md-5 = { version = "0.11", optional = true }
 hkdf = { version = "0.13", optional = true }
