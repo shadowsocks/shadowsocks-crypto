@@ -10,6 +10,13 @@ pub mod v1;
 #[cfg_attr(docsrs, doc(cfg(feature = "v2")))]
 pub mod v2;
 
+// `aws-lc-rs` and `ring` expose the same `aead` / `hkdf` APIs, so the accelerated
+// code paths are shared between them. `aws-lc` takes precedence if both are enabled.
+#[cfg(feature = "aws-lc")]
+use aws_lc_rs as ring_api;
+#[cfg(all(feature = "ring", not(feature = "aws-lc")))]
+use ring as ring_api;
+
 pub mod kind;
 pub mod utils;
 

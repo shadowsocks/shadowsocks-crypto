@@ -1,15 +1,16 @@
 use cfg_if::cfg_if;
 
 cfg_if! {
-    if #[cfg(feature = "aws-lc")] {
-        use aws_lc_rs::aead::{Aad, Algorithm, LessSafeKey, Nonce, UnboundKey, AES_128_GCM, AES_256_GCM};
+    if #[cfg(any(feature = "aws-lc", feature = "ring"))] {
+        use crate::ring_api::aead::{Aad, Algorithm, LessSafeKey, Nonce, UnboundKey, AES_128_GCM, AES_256_GCM};
 
-        struct AeadKey(LessSafeKey);
+        // Boxed: ring's `LessSafeKey` stores key material inline (~540 bytes).
+        struct AeadKey(Box<LessSafeKey>);
 
         impl AeadKey {
             fn new(algorithm: &'static Algorithm, key: &[u8]) -> AeadKey {
                 let unbound = UnboundKey::new(algorithm, key).expect("AEAD key");
-                AeadKey(LessSafeKey::new(unbound))
+                AeadKey(Box::new(LessSafeKey::new(unbound)))
             }
 
             fn encrypt(&self, nonce: &[u8], plaintext_in_ciphertext_out: &mut [u8]) {
@@ -64,39 +65,6 @@ cfg_if! {
 
         aead_cipher!(Aes128Gcm, AES_128_GCM);
         aead_cipher!(Aes256Gcm, AES_256_GCM);
-    } else if #[cfg(feature = "ring")] {
-        use std::convert::{AsMut, AsRef};
-
-        pub use ring_compat::aead::{Aes128Gcm as CryptoAes128Gcm, Aes256Gcm as CryptoAes256Gcm};
-        use ring_compat::{
-            aead::{AeadCore, AeadInPlace, Buffer, Error as AeadError, KeySizeUser, KeyInit},
-            generic_array::{typenum::Unsigned, GenericArray},
-        };
-
-        type Key<B> = GenericArray<u8, <B as KeySizeUser>::KeySize>;
-        type Nonce<NonceSize> = GenericArray<u8, NonceSize>;
-
-        struct SliceBuffer<'a>(&'a mut [u8]);
-
-        impl AsRef<[u8]> for SliceBuffer<'_> {
-            fn as_ref(&self) -> &[u8] {
-                self.0
-            }
-        }
-
-        impl AsMut<[u8]> for SliceBuffer<'_> {
-            fn as_mut(&mut self) -> &mut [u8] {
-                self.0
-            }
-        }
-
-        impl Buffer for SliceBuffer<'_> {
-            fn extend_from_slice(&mut self, _other: &[u8]) -> Result<(), AeadError> {
-                unimplemented!("not used in decrypt_in_place")
-            }
-
-            fn truncate(&mut self, _len: usize) {}
-        }
     } else {
         use aes_gcm::{
             aead::{self, array::typenum::Unsigned, AeadCore, AeadInOut, KeySizeUser, KeyInit},
